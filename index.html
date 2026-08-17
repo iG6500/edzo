@@ -16,6 +16,7 @@
       --text-muted: #94a3b8;
       --success: #22c55e;
       --warning: #f59e0b;
+      --purple: #a855f7;
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -115,9 +116,9 @@
       color: #ffffff;
     }
 
-    .timer-next { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; font-weight: 500; }
+    .timer-next { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; font-weight: 500; }
 
-    /* ÚJ EXERCISE BOX A TIMER ALATT */
+    /* EXERCISE BOX A TIMER ALATT */
     .exercise-instruction-card {
       background: rgba(15, 23, 42, 0.7);
       border: 1px solid var(--primary);
@@ -128,7 +129,7 @@
     }
 
     .ex-label { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; }
-    .ex-current-title { font-size: 1.2rem; font-weight: 800; color: #ffffff; margin-top: 4px; white-space: pre-line; }
+    .ex-current-title { font-size: 1.1rem; font-weight: 800; color: #ffffff; margin-top: 4px; white-space: pre-line; }
 
     .timer-controls { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
     .timer-btn-row { display: flex; gap: 12px; }
@@ -172,6 +173,30 @@
 
     .checkbox { width: 24px; height: 24px; accent-color: var(--success); }
 
+    /* Egyéni Editor */
+    .custom-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
+    .form-group input {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 12px;
+      color: var(--text);
+      font-size: 1rem;
+      font-weight: 700;
+      outline: none;
+    }
+
     /* Modallok */
     .modal-overlay {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
@@ -182,6 +207,13 @@
     .modal-box { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 24px; padding: 24px; width: 100%; max-width: 400px; text-align: center; }
     .rpe-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 16px; }
     .rpe-btn { background: rgba(255,255,255,0.08); border: 1px solid var(--card-border); color: var(--text); padding: 12px 0; border-radius: 12px; font-weight: 700; cursor: pointer; }
+
+    .badges-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; text-align: left; }
+    .badge-card { background: rgba(15, 23, 42, 0.6); border: 1px solid var(--card-border); border-radius: 14px; padding: 12px; opacity: 0.4; transition: all 0.2s; }
+    .badge-card.unlocked { opacity: 1; border-color: var(--primary); }
+    .badge-icon { font-size: 1.8rem; margin-bottom: 4px; }
+    .badge-name { font-size: 0.85rem; font-weight: 700; }
+    .badge-desc { font-size: 0.7rem; color: var(--text-muted); }
 
     /* Bottom Nav */
     .bottom-nav {
@@ -203,6 +235,7 @@
   <div class="app-header">
     <h1 class="app-title">⚡ SIT Pro</h1>
     <div class="header-actions">
+      <button class="header-btn" onclick="openBadgesModal()">🏆 Jelvények</button>
       <button class="header-btn" onclick="exportData()">💾 Mentés</button>
     </div>
   </div>
@@ -218,7 +251,7 @@
       </div>
     </div>
 
-    <!-- Időzítő Nézet -->
+    <!-- 1. Időzítő Nézet -->
     <div id="tabTimer" class="tab-content active-tab">
       <div class="timer-card" id="timerCard">
         <div class="timer-phase" id="phaseLabel">Készen állsz?</div>
@@ -234,16 +267,44 @@
         </div>
       </div>
 
-      <!-- ÚJ GYAKORLAT UTASÍTÁSOK BOX -->
+      <!-- GYAKORLAT UTASÍTÁSOK BOX -->
       <div class="exercise-instruction-card">
         <div class="ex-label">Aktuális Feladat</div>
         <div class="ex-current-title" id="currentExerciseInstruction">Válassz edzést a kezdéshez</div>
       </div>
     </div>
 
-    <!-- Edzésterv Nézet -->
+    <!-- 2. Edzésterv Nézet -->
     <div id="tabPlan" class="tab-content">
       <div id="workoutList"></div>
+    </div>
+
+    <!-- 3. Egyéni Szerkesztő Nézet (Beállítások) -->
+    <div id="tabCustom" class="tab-content">
+      <div class="custom-card">
+        <h2 style="font-size:1.1rem; margin:0 0 4px 0;">⚙️ Egyéni SIT Szerkesztő</h2>
+        <div class="form-group">
+          <label>Bemelegítés (másodperc)</label>
+          <input type="number" id="customWarmup" value="120">
+        </div>
+        <div class="form-group">
+          <label>Sprint hossza (másodperc)</label>
+          <input type="number" id="customSprint" value="20">
+        </div>
+        <div class="form-group">
+          <label>Pihenő hossza (másodperc)</label>
+          <input type="number" id="customRest" value="120">
+        </div>
+        <div class="form-group">
+          <label>Sprintek száma (darab)</label>
+          <input type="number" id="customCount" value="3">
+        </div>
+        <div class="form-group">
+          <label>Levezetés (másodperc)</label>
+          <input type="number" id="customCooldown" value="180">
+        </div>
+        <button class="btn" onclick="launchCustomWorkout()">▶ Egyéni Edzés Indítása</button>
+      </div>
     </div>
   </div>
 
@@ -267,6 +328,16 @@
     </div>
   </div>
 
+  <!-- Jelvények Modal -->
+  <div class="modal-overlay" id="badgesModal">
+    <div class="modal-box">
+      <h2 style="font-size:1.2rem; font-weight:800; margin-bottom:8px;">🏆 Teljesítmények</h2>
+      <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Mérföldkövek a program során</p>
+      <div class="badges-grid" id="badgesGrid"></div>
+      <button class="btn btn-reset" style="width:100%; margin-top:16px;" onclick="closeBadgesModal()">Bezárás</button>
+    </div>
+  </div>
+
   <!-- Bottom Navigation -->
   <div class="bottom-nav">
     <button class="nav-item active-nav" id="navBtnTimer" onclick="switchTab('timer')">
@@ -276,6 +347,10 @@
     <button class="nav-item" id="navBtnPlan" onclick="switchTab('plan')">
       <span style="font-size:1.3rem;">📅</span>
       <span>Edzésterv</span>
+    </button>
+    <button class="nav-item" id="navBtnCustom" onclick="switchTab('custom')">
+      <span style="font-size:1.3rem;">⚙️</span>
+      <span>Egyéni</span>
     </button>
   </div>
 
@@ -310,10 +385,9 @@
   function beepCount() { playSound(600, 'sine', 0.15); if ('vibrate' in navigator) navigator.vibrate(100); }
   function beepStart() { playSound(1200, 'triangle', 0.5); if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]); }
 
-  // BESZÉD LOGIKA JAVÍTVA (iOS felfüggesztés ellen)
   function speak(text) {
     if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel(); // Töröljük az esetlegesen beragadt előző beszédhangot
+      window.speechSynthesis.cancel();
       setTimeout(() => {
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'hu-HU';
@@ -323,13 +397,10 @@
     }
   }
 
-  // WAKELOCK (Kijelző elalvás elleni védelem megerősítése)
   let wakeLock = null;
   async function requestWakeLock() {
     try {
-      if ('wakeLock' in navigator) {
-        wakeLock = await navigator.wakeLock.request('screen');
-      }
+      if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen');
     } catch (err) {}
   }
 
@@ -343,7 +414,6 @@
     }
   });
 
-  // Web Worker Háttéridőzítő
   const workerBlob = new Blob([`
     let interval = null;
     self.onmessage = function(e) {
@@ -357,7 +427,6 @@
   const timerWorker = new Worker(URL.createObjectURL(workerBlob));
   timerWorker.onmessage = function(e) { if (e.data === 'tick') tick(); };
 
-  // Program Edzésadatok
   const workoutData = [
     { week: 1, day: "Hétfő", ex: ["Magas térdemelés", "Magas térdemelés"], sprints: 2, rest: 120, note: "Rákészülés, megszokás" },
     { week: 1, day: "Szerda", ex: ["Magas térdemelés", "Magas térdemelés"], sprints: 2, rest: 120, note: "Maximális erőkifejtés!" },
@@ -373,12 +442,35 @@
     { week: 4, day: "Péntek", ex: ["Burpee", "Hegymászó", "Terpeszugrás", "Burpee"], sprints: 4, rest: 120, note: "Utolsó edzés: Mindent bele!" }
   ];
 
+  const badgesDef = [
+    { id: "badge_first", icon: "🚀", name: "Első Lépés", desc: "1. edzés teljesítve" },
+    { id: "badge_halfway", icon: "🔥", name: "Féltávnál", desc: "6 edzés teljesítve" },
+    { id: "badge_burpee", icon: "💥", name: "Burpee Harcos", desc: "3. hét elindítva" },
+    { id: "badge_master", icon: "👑", name: "SIT Bajnok", desc: "Mind a 12 edzés kész" }
+  ];
+
   function switchTab(tabName) {
     document.getElementById('tabTimer').classList.toggle('active-tab', tabName === 'timer');
     document.getElementById('tabPlan').classList.toggle('active-tab', tabName === 'plan');
+    document.getElementById('tabCustom').classList.toggle('active-tab', tabName === 'custom');
+
     document.getElementById('navBtnTimer').classList.toggle('active-nav', tabName === 'timer');
     document.getElementById('navBtnPlan').classList.toggle('active-nav', tabName === 'plan');
+    document.getElementById('navBtnCustom').classList.toggle('active-nav', tabName === 'custom');
   }
+
+  let touchStartX = 0;
+  document.getElementById('touchArea').addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX);
+  document.getElementById('touchArea').addEventListener('touchend', e => {
+    let diff = touchStartX - e.changedTouches[0].screenX;
+    if (diff > 80) {
+      if (document.getElementById('tabTimer').classList.contains('active-tab')) switchTab('plan');
+      else if (document.getElementById('tabPlan').classList.contains('active-tab')) switchTab('custom');
+    } else if (diff < -80) {
+      if (document.getElementById('tabCustom').classList.contains('active-tab')) switchTab('plan');
+      else if (document.getElementById('tabPlan').classList.contains('active-tab')) switchTab('timer');
+    }
+  });
 
   let activeWorkoutIndex = null;
 
@@ -420,12 +512,39 @@
     const percent = Math.round((completedCount / workoutData.length) * 100);
     document.getElementById("progressBar").style.width = `${percent}%`;
     document.getElementById("progressText").innerText = `${percent}% (${completedCount}/${workoutData.length})`;
+
+    checkBadges(completedCount);
   }
 
   function toggleCheck(index, element) {
     localStorage.setItem(`sit_workout_${index}`, element.checked);
     renderWorkouts();
   }
+
+  function checkBadges(completedCount) {
+    let unlocked = {};
+    if (completedCount >= 1) unlocked['badge_first'] = true;
+    if (completedCount >= 6) unlocked['badge_halfway'] = true;
+    if (completedCount >= 12) unlocked['badge_master'] = true;
+    if (localStorage.getItem('sit_workout_6') === "true") unlocked['badge_burpee'] = true;
+
+    const container = document.getElementById("badgesGrid");
+    container.innerHTML = "";
+    badgesDef.forEach(b => {
+      const isUnlocked = unlocked[b.id];
+      const card = document.createElement("div");
+      card.className = `badge-card ${isUnlocked ? 'unlocked' : ''}`;
+      card.innerHTML = `
+        <div class="badge-icon">${b.icon}</div>
+        <div class="badge-name">${b.name}</div>
+        <div class="badge-desc">${b.desc}</div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  function openBadgesModal() { document.getElementById('badgesModal').classList.add('active'); }
+  function closeBadgesModal() { document.getElementById('badgesModal').classList.remove('active'); }
 
   function submitRPE(val) {
     if (activeWorkoutIndex !== null) {
@@ -441,7 +560,7 @@
   let secondsLeft = 0;
   let activeRoutine = [];
 
-  function buildRoutine(warmupSec, restSec, cooldownSec, exList) {
+  function buildRoutine(warmupSec, sprintSec, restSec, cooldownSec, exList) {
     let routine = [{ 
       name: "Bemelegítés", 
       duration: warmupSec, 
@@ -454,7 +573,7 @@
     exList.forEach((exName, i) => {
       routine.push({ 
         name: `${i + 1}. SPRINT (100%)`, 
-        duration: 20, 
+        duration: sprintSec, 
         class: "bg-sprint", 
         next: i === exList.length - 1 ? "Levezetés" : "Pihenő",
         instruction: `🔥 MAX ERŐBEDOBÁS:\n${exName.toUpperCase()}`,
@@ -490,7 +609,7 @@
     const item = workoutData[index];
     resetTimer();
     
-    activeRoutine = buildRoutine(120, item.rest, 180, item.ex);
+    activeRoutine = buildRoutine(120, 20, item.rest, 180, item.ex);
     currentStepIndex = 0;
     secondsLeft = activeRoutine[0].duration;
     
@@ -500,9 +619,31 @@
     switchTab('timer');
   }
 
+  function launchCustomWorkout() {
+    activeWorkoutIndex = null;
+    const w = parseInt(document.getElementById('customWarmup').value) || 60;
+    const s = parseInt(document.getElementById('customSprint').value) || 20;
+    const r = parseInt(document.getElementById('customRest').value) || 120;
+    const c = parseInt(document.getElementById('customCount').value) || 3;
+    const cd = parseInt(document.getElementById('customCooldown').value) || 120;
+
+    const customEx = [];
+    for (let i = 1; i <= c; i++) customEx.push(`Sprint ${i}/${c}`);
+
+    resetTimer();
+    activeRoutine = buildRoutine(w, s, r, cd, customEx);
+    currentStepIndex = 0;
+    secondsLeft = activeRoutine[0].duration;
+
+    document.getElementById("phaseLabel").innerText = activeRoutine[0].name;
+    document.getElementById("nextLabel").innerText = `Egyéni SIT (${c}×${s}s)`;
+    updateTimerUI();
+    switchTab('timer');
+  }
+
   function toggleTimer() {
     if (activeRoutine.length === 0) {
-      alert("Válassz ki egy edzést az Edzésterv fülön!");
+      alert("Válassz ki egy edzést az Edzésterv vagy Egyéni fülön!");
       switchTab('plan');
       return;
     }
