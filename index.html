@@ -169,6 +169,7 @@
     .week-title { font-size: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--primary); margin: 20px 0 12px 4px; }
     .workout-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 18px; padding: 18px; margin-bottom: 14px; }
     .workout-card.completed { border-color: rgba(34, 197, 94, 0.4); opacity: 0.8; }
+    .workout-card.active-next { border-color: var(--primary); background: rgba(56, 189, 248, 0.05); }
     .workout-header { display: flex; align-items: center; justify-content: space-between; }
     .workout-day { font-weight: 700; font-size: 1.1rem; }
     .workout-ex { font-size: 0.95rem; margin: 10px 0; white-space: pre-line; line-height: 1.5; color: #cbd5e1; }
@@ -234,7 +235,7 @@
     .bottom-nav {
       position: fixed; bottom: 0; left: 0; right: 0; height: 70px;
       background: #1e293b; border-top: 1px solid var(--card-border);
-      display: flex; justify-content: space-around; align-items: center; z-index: 1000;
+      display: flex; justify-space-around; align-items: center; z-index: 1000;
     }
     .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: none; border: none; color: var(--text-muted); font-size: 0.75rem; font-weight: 600; cursor: pointer; width: 33.3%; height: 100%; }
     .nav-item.active-nav { color: var(--primary); border-top: 3px solid var(--primary); }
@@ -271,7 +272,7 @@
       <div class="timer-card" id="timerCard">
         <div class="timer-phase" id="phaseLabel">Készen állsz?</div>
         <div class="timer-display" id="timeDisplay">00:00</div>
-        <div class="timer-next" id="nextLabel">Válassz egy edzést az 'Edzésterv' fülön!</div>
+        <div class="timer-next" id="nextLabel">Betöltés...</div>
         
         <div class="timer-controls">
           <div class="timer-btn-row">
@@ -285,7 +286,7 @@
       <!-- GYAKORLAT UTASÍTÁSOK BOX -->
       <div class="exercise-instruction-card">
         <div class="ex-label">Aktuális Feladat</div>
-        <div class="ex-current-title" id="currentExerciseInstruction">Válassz edzést a kezdéshez</div>
+        <div class="ex-current-title" id="currentExerciseInstruction">Kezdéshez nyomj a Start gombra</div>
       </div>
     </div>
 
@@ -374,7 +375,6 @@
   </div>
 
 <script>
-  // Web Audio API & MediaSession
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   
   function setupAudioSession() {
@@ -493,11 +493,41 @@
 
   let activeWorkoutIndex = null;
 
+  // AUTOMATIKUS KÖVETKEZŐ EDZÉS BETÖLTÉSE
+  function autoLoadNextWorkout() {
+    let firstUnfinishedIndex = -1;
+    for (let i = 0; i < workoutData.length; i++) {
+      if (localStorage.getItem(`sit_workout_${i}`) !== "true") {
+        firstUnfinishedIndex = i;
+        break;
+      }
+    }
+
+    if (firstUnfinishedIndex !== -1) {
+      loadProgramWorkout(firstUnfinishedIndex, false); // Betölti, de nem vált át automatikusan a fülre ha épp máshol van
+    } else {
+      // Ha mind az 12 kész
+      resetTimer();
+      document.getElementById("phaseLabel").innerText = "👑 Gratulálunk!";
+      document.getElementById("nextLabel").innerText = "Minden edzést teljesítettél!";
+      document.getElementById("currentExerciseInstruction").innerText = "A 4 hetes SIT programot sikeresen befejezted!";
+    }
+  }
+
   function renderWorkouts() {
     const listEl = document.getElementById("workoutList");
     listEl.innerHTML = "";
     let currentWeek = 0;
     let completedCount = 0;
+
+    // Megkeressük az első még nem kész indexet a kiemeléshez
+    let nextUnfinishedIndex = -1;
+    for (let i = 0; i < workoutData.length; i++) {
+      if (localStorage.getItem(`sit_workout_${i}`) !== "true") {
+        nextUnfinishedIndex = i;
+        break;
+      }
+    }
 
     workoutData.forEach((item, index) => {
       if (item.week !== currentWeek) {
@@ -512,18 +542,19 @@
       if (isChecked) completedCount++;
 
       const savedRPE = localStorage.getItem(`sit_rpe_${index}`);
+      const isNext = (index === nextUnfinishedIndex);
 
       const card = document.createElement("div");
-      card.className = `workout-card ${isChecked ? 'completed' : ''}`;
+      card.className = `workout-card ${isChecked ? 'completed' : ''} ${isNext ? 'active-next' : ''}`;
       card.innerHTML = `
         <div class="workout-header">
-          <div class="workout-day">${item.day}</div>
+          <div class="workout-day">${item.day} ${isNext ? '<span style="font-size:0.75rem; color:var(--primary); font-weight:700;">(Soron következő)</span>' : ''}</div>
           <input type="checkbox" class="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleCheck(${index}, this)">
         </div>
         <div class="workout-ex">${item.ex.map((e, i) => `${i+1}. ${e}`).join('\n')}</div>
         <div class="workout-meta">${item.sprints} × 20 mp sprint (${item.rest} mp pihenő) | <i>${item.note}</i></div>
         ${savedRPE ? `<div style="font-size:0.8rem; color:var(--warning); font-weight:700; margin-bottom:10px;">🔥 RPE Terhelés: ${savedRPE}/10</div>` : ''}
-        <button class="btn-start-workout" onclick="loadProgramWorkout(${index})">▶ Kijelölés és Indítás</button>
+        <button class="btn-start-workout" onclick="loadProgramWorkout(${index}, true)">▶ Kijelölés és Indítás</button>
       `;
       listEl.appendChild(card);
     });
@@ -539,6 +570,7 @@
   function toggleCheck(index, element) {
     localStorage.setItem(`sit_workout_${index}`, element.checked);
     renderWorkouts();
+    autoLoadNextWorkout();
   }
 
   function checkBadges(completedCount) {
@@ -572,6 +604,7 @@
       localStorage.setItem(`sit_workout_${activeWorkoutIndex}`, "true");
       document.getElementById('rpeModal').classList.remove('active');
       renderWorkouts();
+      autoLoadNextWorkout(); // RPE mentés után azonnal áttér a következő edzésre
     }
   }
 
@@ -624,7 +657,7 @@
     return routine;
   }
 
-  function loadProgramWorkout(index) {
+  function loadProgramWorkout(index, shouldSwitchTab = true) {
     activeWorkoutIndex = index;
     const item = workoutData[index];
     resetTimer();
@@ -636,7 +669,7 @@
     document.getElementById("phaseLabel").innerText = activeRoutine[0].name;
     document.getElementById("nextLabel").innerText = `Kiválasztva: ${item.day} (${item.week}. hét)`;
     updateTimerUI();
-    switchTab('timer');
+    if (shouldSwitchTab) switchTab('timer');
   }
 
   function launchCustomWorkout() {
@@ -700,7 +733,7 @@
     document.getElementById("phaseLabel").innerText = "Készen állsz?";
     document.getElementById("timeDisplay").innerText = "00:00";
     document.getElementById("nextLabel").innerText = "Válassz egy edzést!";
-    document.getElementById("currentExerciseInstruction").innerText = "Válassz edzést a kezdéshez";
+    document.getElementById("currentExerciseInstruction").innerText = "Kezdéshez nyomj a Start gombra";
     document.getElementById("timerCard").className = "timer-card";
   }
 
@@ -760,7 +793,9 @@
     a.click();
   }
 
+  // Inicializálás: Listák frissítése ÉS a következő elvégzendő edzés automatikus betöltése
   renderWorkouts();
+  autoLoadNextWorkout();
 </script>
 
 </body>
