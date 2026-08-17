@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0f172a">
+  <title>SIT 4 Hetes Pro Edzés</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --primary: #38bdf8;
+      --accent: #ef4444;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --purple: #a855f7;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text);
+      margin: 0;
+      padding: 0 0 90px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .app-header {
+      width: 100%;
+      background: rgba(30, 41, 59, 0.85);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .app-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .header-btn {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .container {
+      max-width: 500px;
+      width: 100%;
+      padding: 16px;
+      flex: 1;
+    }
+
+    .progress-box {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .progress-container {
+      background: #334155;
+      border-radius: 8px;
+      height: 8px;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      background: var(--success);
+      height: 100%;
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    .tab-content {
+      display: none !important;
+    }
+
+    .tab-content.active-tab {
+      display: block !important;
+    }
+
+    /* Időzítő Kártya */
+    .timer-card {
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      border-radius: 24px;
+      padding: 28px 20px;
+      text-align: center;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .timer-phase {
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--primary);
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .timer-display {
+      font-size: 4.8rem;
+      font-weight: 800;
+      font-family: "SF Mono", SFMono-Regular, monospace;
+      letter-spacing: -2px;
+      margin: 10px 0;
+      color: #ffffff;
+    }
+
+    .timer-next {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 25px;
+      font-weight: 500;
+    }
+
+    .timer-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .timer-btn-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn {
+      background: var(--primary);
+      color: #0f172a;
+      border: none;
+      padding: 16px;
+      font-size: 1rem;
+      font-weight: 700;
+      border-radius: 16px;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .btn:active { transform: scale(0.97); }
+    .btn-skip { background: var(--warning); color: #0f172a; }
+    .btn-reset { background: rgba(255, 255, 255, 0.08); color: var(--text-muted); border: 1px solid var(--card-border); }
+
+    /* Edzésterv */
+    .week-title {
+      font-size: 1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--primary);
+      margin: 25px 0 12px 4px;
+    }
+
+    .workout-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+
+    .workout-card.completed {
+      border-color: rgba(34, 197, 94, 0.4);
+      opacity: 0.8;
+    }
+
+    .workout-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .workout-day { font-weight: 700; font-size: 1.1rem; }
+    .workout-ex { font-size: 0.95rem; margin: 10px 0; white-space: pre-line; line-height: 1.5; color: #cbd5e1; }
+    .workout-meta { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px; }
+
+    .rpe-badge-display {
+      font-size: 0.8rem;
+      color: var(--warning);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .btn-start-workout {
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--primary);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 12px;
+      width: 100%;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .note-input {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .checkbox { width: 24px; height: 24px; accent-color: var(--success); }
+
+    /* Egyéni Editor Stílusok */
+    .custom-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .form-group input {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 12px;
+      color: var(--text);
+      font-size: 1rem;
+      font-weight: 700;
+      outline: none;
+    }
+
+    /* Modallok (RPE & Jelvények) */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.active { display: flex; }
+
+    .modal-box {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 24px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .modal-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 8px; }
+    .modal-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; }
+
+    .rpe-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .rpe-btn {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 12px 0;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .rpe-btn:active { background: var(--primary); color: #0f172a; }
+
+    .badges-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      text-align: left;
+    }
+
+    .badge-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 12px;
+      opacity: 0.4;
+      transition: all 0.2s;
+    }
+
+    .badge-card.unlocked {
+      opacity: 1;
+      border-color: var(--primary);
+    }
+
+    .badge-icon { font-size: 1.8rem; margin-bottom: 4px; }
+    .badge-name { font-size: 0.85rem; font-weight: 700; }
+    .badge-desc { font-size: 0.7rem; color: var(--text-muted); }
+
+    /* Bottom Nav */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 70px;
+      background: #1e293b;
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      width: 33.3%;
+      height: 100%;
+    }
+
+    .nav-item.active-nav {
+      color: var(--primary);
+      border-top: 3px solid var(--primary);
+    }
+
+    .bg-warmup { border-color: #38bdf8 !important; }
+    .bg-sprint { border-color: #ef4444 !important; }
+    .bg-rest   { border-color: #22c55e !important; }
+    .bg-cooldown { border-color: #a855f7 !important; }
+  </style>
+</head>
+<body>
+
+  <!-- App Fejléc -->
+  <div class="app-header">
+    <h1 class="app-title">⚡ SIT Pro</h1>
+    <div class="header-actions">
+      <button class="header-btn" onclick="openBadgesModal()">🏆 Jelvények</button>
+      <button class="header-btn" onclick="exportData()">💾 Mentés</button>
+    </div>
+  </div>
+
+  <div class="container" id="touchArea">
+    <!-- Összesített Haladás -->
+    <div class="progress-box">
+      <div class="progress-info">
+        <span>Összesített Haladás</span>
+        <span id="progressText">0% (0/12)</span>
+      </div>
+      <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+    </div>
+
+    <!-- 1. Időzítő Nézet -->
+    <div id="tabTimer" class="tab-content active-tab">
+      <div class="timer-card" id="timerCard">
+        <div class="timer-phase" id="phaseLabel">Készen állsz?</div>
+        <div class="timer-display" id="timeDisplay">00:00</div>
+        <div class="timer-next" id="nextLabel">Válassz egy edzést az 'Edzésterv' fülön!</div>
+        <div class="timer-controls">
+          <div class="timer-btn-row">
+            <button class="btn" id="startBtn" onclick="toggleTimer()">Start / Szünet</button>
+            <button class="btn btn-skip" onclick="skipStep()">Léptetés ⏭</button>
+          </div>
+          <button class="btn btn-reset" onclick="resetTimer()">Mégse / Alaphelyzet</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Edzésterv Nézet -->
+    <div id="tabPlan" class="tab-content">
+      <div id="workoutList"></div>
+    </div>
+
+    <!-- 3. Egyéni SIT Szerkesztő Nézet -->
+    <div id="tabCustom" class="tab-content">
+      <div class="custom-card">
+        <h2 style="font-size:1.1rem; margin:0 0 4px 0;">⚙️ Egyéni SIT Időzítő</h2>
+        <div class="form-group">
+          <label>Bemelegítés (másodperc)</label>
+          <input type="number" id="customWarmup" value="120">
+        </div>
+        <div class="form-group">
+          <label>Sprint hossza (másodperc)</label>
+          <input type="number" id="customSprint" value="20">
+        </div>
+        <div class="form-group">
+          <label>Pihenő hossza (másodperc)</label>
+          <input type="number" id="customRest" value="120">
+        </div>
+        <div class="form-group">
+          <label>Sprintek száma (darab)</label>
+          <input type="number" id="customCount" value="3">
+        </div>
+        <div class="form-group">
+          <label>Levezetés (másodperc)</label>
+          <input type="number" id="customCooldown" value="180">
+        </div>
+        <button class="btn" onclick="launchCustomWorkout()">▶ Egyéni Edzés Indítása</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RPE Értékelő Modal -->
+  <div class="modal-overlay" id="rpeModal">
+    <div class="modal-box">
+      <div class="modal-title">Edzés Teljesítve! 🎉</div>
+      <div class="modal-desc">Értékeld a terhelési szintet (RPE 1-10):<br>1 = Nagyon könnyű, 10 = Max kimerülés</div>
+      <div class="rpe-grid">
+        <button class="rpe-btn" onclick="submitRPE(1)">1</button>
+        <button class="rpe-btn" onclick="submitRPE(2)">2</button>
+        <button class="rpe-btn" onclick="submitRPE(3)">3</button>
+        <button class="rpe-btn" onclick="submitRPE(4)">4</button>
+        <button class="rpe-btn" onclick="submitRPE(5)">5</button>
+        <button class="rpe-btn" onclick="submitRPE(6)">6</button>
+        <button class="rpe-btn" onclick="submitRPE(7)">7</button>
+        <button class="rpe-btn" onclick="submitRPE(8)">8</button>
+        <button class="rpe-btn" onclick="submitRPE(9)">9</button>
+        <button class="rpe-btn" onclick="submitRPE(10)">10</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Jelvények Modal -->
+  <div class="modal-overlay" id="badgesModal">
+    <div class="modal-box">
+      <div class="modal-title">🏆 Teljesítmények</div>
+      <div class="modal-desc">Mérföldkövek a 4 hetes program során</div>
+      <div class="badges-grid" id="badgesGrid"></div>
+      <button class="btn btn-reset" style="width:100%; margin-top:16px;" onclick="closeBadgesModal()">Bezárás</button>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav">
+    <button class="nav-item active-nav" id="navBtnTimer" onclick="switchTab('timer')">
+      <span style="font-size:1.3rem;">⏱️</span>
+      <span>Időzítő</span>
+    </button>
+    <button class="nav-item" id="navBtnPlan" onclick="switchTab('plan')">
+      <span style="font-size:1.3rem;">📅</span>
+      <span>Edzésterv</span>
+    </button>
+    <button class="nav-item" id="navBtnCustom" onclick="switchTab('custom')">
+      <span style="font-size:1.3rem;">⚙️</span>
+      <span>Egyéni</span>
+    </button>
+  </div>
+
+<script>
+  // PWA Manifest Injection
+  const manifest = {
+    name: "SIT 4 Hetes Pro",
+    short_name: "SIT Pro",
+    start_url: ".",
+    display: "standalone",
+    background_color: "#0f172a",
+    theme_color: "#0f172a"
+  };
+  const blobManifest = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+  const link = document.createElement('link');
+  link.rel = 'manifest';
+  link.href = URL.createObjectURL(blobManifest);
+  document.head.appendChild(link);
+
+  // Web Audio API & MediaSession (Audio Focus & Lehalkítás)
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  
+  function setupAudioSession() {
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: 'SIT Pro Edzés',
+        artist: 'SIT Timer',
+        album: 'Interval Training'
+      });
+    }
+  }
+
+  function playSound(freq, type, duration) {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    setupAudioSession();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+    osc.stop(audioCtx.currentTime + duration);
+  }
+
+  function beepCount() {
+    playSound(600, 'sine', 0.15);
+    vibrate(100);
+  }
+
+  function beepStart() {
+    playSound(1200, 'triangle', 0.5);
+    vibrate([200, 100, 200]);
+  }
+
+  function vibrate(pattern) {
+    if ('vibrate' in navigator) navigator.vibrate(pattern);
+  }
+
+  // Web Worker Háttéridőzítő
+  const workerBlob = new Blob([`
+    let interval = null;
+    self.onmessage = function(e) {
+      if (e.data === 'start') {
+        interval = setInterval(() => { self.postMessage('tick'); }, 1000);
+      } else if (e.data === 'stop') {
+        clearInterval(interval);
+      }
+    };
+  `], { type: 'application/javascript' });
+  const timerWorker = new Worker(URL.createObjectURL(workerBlob));
+  timerWorker.onmessage = function(e) { if (e.data === 'tick') tick(); };
+
+  // Program Edzésadatok
+  const workoutData = [
+    { week: 1, day: "Hétfő", ex: "1. Magas térdemelés\n2. Magas térdemelés", sprints: 2, rest: 120, note: "Rákészülés, megszokás" },
+    { week: 1, day: "Szerda", ex: "1. Magas térdemelés\n2. Magas térdemelés", sprints: 2, rest: 120, note: "Maximális erőkifejtés!" },
+    { week: 1, day: "Péntek", ex: "1. Magas térdemelés\n2. Magas térdemelés", sprints: 2, rest: 120, note: "Figyeld a pulzusod" },
+    { week: 2, day: "Hétfő", ex: "1. Magas térdemelés\n2. Hegymászó\n3. Magas térdemelés", sprints: 3, rest: 120, note: "Alap cikk-protokoll" },
+    { week: 2, day: "Szerda", ex: "1. Magas térdemelés\n2. Hegymászó\n3. Magas térdemelés", sprints: 3, rest: 120, note: "Tartsd a 100%-os tempót" },
+    { week: 2, day: "Péntek", ex: "1. Magas térdemelés\n2. Hegymászó\n3. Magas térdemelés", sprints: 3, rest: 120, note: "Séta a pihenőkben" },
+    { week: 3, day: "Hétfő", ex: "1. Burpee\n2. Hegymászó\n3. Magas térdemelés", sprints: 3, rest: 90, note: "Sűrítés: 90 mp pihenő!" },
+    { week: 3, day: "Szerda", ex: "1. Burpee\n2. Hegymászó\n3. Magas térdemelés", sprints: 3, rest: 90, note: "Szigorú pihenőidők" },
+    { week: 3, day: "Péntek", ex: "1. Burpee\n2. Hegymászó\n3. Magas térdemelés", sprints: 3, rest: 90, note: "Szabályos Burpee forma" },
+    { week: 4, day: "Hétfő", ex: "1. Burpee\n2. Hegymászó\n3. Terpeszugrás\n4. Burpee", sprints: 4, rest: 120, note: "Plusz 1 sprintblokk!" },
+    { week: 4, day: "Szerda", ex: "1. Burpee\n2. Hegymászó\n3. Terpeszugrás\n4. Burpee", sprints: 4, rest: 120, note: "Mind a 4 sprint max gáz" },
+    { week: 4, day: "Péntek", ex: "1. Burpee\n2. Hegymászó\n3. Terpeszugrás\n4. Burpee", sprints: 4, rest: 120, note: "Utolsó edzés: Mindent bele!" }
+  ];
+
+  // Jelvények definíciója
+  const badgesDef = [
+    { id: "badge_first", icon: "🚀", name: "Első Lépés", desc: "1. edzés teljesítve" },
+    { id: "badge_halfway", icon: "🔥", name: "Féltávnál", desc: "6 edzés teljesítve" },
+    { id: "badge_burpee", icon: "💥", name: "Burpee Harcos", desc: "3. hét elindítva" },
+    { id: "badge_master", icon: "👑", name: "SIT Bajnok", desc: "Mind a 12 edzés kész" }
+  ];
+
+  // Navigáció & Swipe
+  function switchTab(tabName) {
+    document.getElementById('tabTimer').classList.toggle('active-tab', tabName === 'timer');
+    document.getElementById('tabPlan').classList.toggle('active-tab', tabName === 'plan');
+    document.getElementById('tabCustom').classList.toggle('active-tab', tabName === 'custom');
+
+    document.getElementById('navBtnTimer').classList.toggle('active-nav', tabName === 'timer');
+    document.getElementById('navBtnPlan').classList.toggle('active-nav', tabName === 'plan');
+    document.getElementById('navBtnCustom').classList.toggle('active-nav', tabName === 'custom');
+  }
+
+  let touchStartX = 0;
+  document.getElementById('touchArea').addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX);
+  document.getElementById('touchArea').addEventListener('touchend', e => {
+    let diff = touchStartX - e.changedTouches[0].screenX;
+    if (diff > 80) {
+      if (document.getElementById('tabTimer').classList.contains('active-tab')) switchTab('plan');
+      else if (document.getElementById('tabPlan').classList.contains('active-tab')) switchTab('custom');
+    } else if (diff < -80) {
+      if (document.getElementById('tabCustom').classList.contains('active-tab')) switchTab('plan');
+      else if (document.getElementById('tabPlan').classList.contains('active-tab')) switchTab('timer');
+    }
+  });
+
+  let activeWorkoutIndex = null;
+
+  function renderWorkouts() {
+    const listEl = document.getElementById("workoutList");
+    listEl.innerHTML = "";
+    let currentWeek = 0;
+    let completedCount = 0;
+
+    workoutData.forEach((item, index) => {
+      if (item.week !== currentWeek) {
+        currentWeek = item.week;
+        const weekHeader = document.createElement("div");
+        weekHeader.className = "week-title";
+        weekHeader.innerText = `${currentWeek}. Hét`;
+        listEl.appendChild(weekHeader);
+      }
+
+      const isChecked = localStorage.getItem(`sit_workout_${index}`) === "true";
+      if (isChecked) completedCount++;
+
+      const savedNote = localStorage.getItem(`sit_note_${index}`) || "";
+      const savedRPE = localStorage.getItem(`sit_rpe_${index}`);
+
+      const card = document.createElement("div");
+      card.className = `workout-card ${isChecked ? 'completed' : ''}`;
+      card.innerHTML = `
+        <div class="workout-header">
+          <div class="workout-day">${item.day}</div>
+          <input type="checkbox" class="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleCheck(${index}, this)">
+        </div>
+        <div class="workout-ex">${item.ex}</div>
+        <div class="workout-meta">${item.sprints} × 20 mp sprint (${item.rest} mp pihenő) | <i>${item.note}</i></div>
+        ${savedRPE ? `<div class="rpe-badge-display">🔥 RPE Terhelés: ${savedRPE}/10</div>` : ''}
+        <button class="btn-start-workout" onclick="loadProgramWorkout(${index})">▶ Kijelölés és Indítás</button>
+        <input type="text" class="note-input" placeholder="Jegyzet..." value="${savedNote}" onchange="saveNote(${index}, this.value)">
+      `;
+      listEl.appendChild(card);
+    });
+
+    const percent = Math.round((completedCount / workoutData.length) * 100);
+    document.getElementById("progressBar").style.width = `${percent}%`;
+    document.getElementById("progressText").innerText = `${percent}% (${completedCount}/${workoutData.length})`;
+
+    checkBadges(completedCount);
+  }
+
+  function toggleCheck(index, element) {
+    localStorage.setItem(`sit_workout_${index}`, element.checked);
+    renderWorkouts();
+  }
+
+  function saveNote(index, value) {
+    localStorage.setItem(`sit_note_${index}`, value);
+  }
+
+  // JelvényekEllenőrzése
+  function checkBadges(completedCount) {
+    let unlocked = {};
+    if (completedCount >= 1) unlocked['badge_first'] = true;
+    if (completedCount >= 6) unlocked['badge_halfway'] = true;
+    if (completedCount >= 12) unlocked['badge_master'] = true;
+
+    // Burpee check (3. heti edzés pipálva)
+    if (localStorage.getItem('sit_workout_6') === "true") unlocked['badge_burpee'] = true;
+
+    const container = document.getElementById("badgesGrid");
+    container.innerHTML = "";
+    badgesDef.forEach(b => {
+      const isUnlocked = unlocked[b.id];
+      const card = document.createElement("div");
+      card.className = `badge-card ${isUnlocked ? 'unlocked' : ''}`;
+      card.innerHTML = `
+        <div class="badge-icon">${b.icon}</div>
+        <div class="badge-name">${b.name}</div>
+        <div class="badge-desc">${b.desc}</div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  function openBadgesModal() { document.getElementById('badgesModal').classList.add('active'); }
+  function closeBadgesModal() { document.getElementById('badgesModal').classList.remove('active'); }
+
+  function showRpeModal() {
+    if (activeWorkoutIndex !== null) {
+      document.getElementById('rpeModal').classList.add('active');
+    }
+  }
+
+  function submitRPE(val) {
+    if (activeWorkoutIndex !== null) {
+      localStorage.setItem(`sit_rpe_${activeWorkoutIndex}`, val);
+      localStorage.setItem(`sit_workout_${activeWorkoutIndex}`, "true");
+      document.getElementById('rpeModal').classList.remove('active');
+      renderWorkouts();
+    }
+  }
+
+  function speak(text) {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'hu-HU';
+      window.speechSynthesis.speak(utterance);
+    }
+  }
+
+  let wakeLock = null;
+  async function requestWakeLock() {
+    try {
+      if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen');
+    } catch (err) {}
+  }
+
+  function releaseWakeLock() {
+    if (wakeLock) { wakeLock.release(); wakeLock = null; }
+  }
+
+  let isRunning = false;
+  let currentStepIndex = 0;
+  let secondsLeft = 0;
+  let activeRoutine = [];
+
+  function buildRoutine(warmupSec, sprintSec, restSec, sprintsCount, cooldownSec) {
+    let routine = [{ name: "Bemelegítés", duration: warmupSec, class: "bg-warmup", next: "1. SPRINT", speakText: "Kezdődik a bemelegítés." }];
+    for (let i = 1; i <= sprintsCount; i++) {
+      routine.push({ 
+        name: `${i}. SPRINT (100%)`, 
+        duration: sprintSec, 
+        class: "bg-sprint", 
+        next: i === sprintsCount ? "Levezetés" : "Pihenő",
+        speakText: `${i}. sprint! Mindent bele!`
+      });
+      if (i < sprintsCount) {
+        routine.push({ 
+          name: "Aktív Pihenő", 
+          duration: restSec, 
+          class: "bg-rest", 
+          next: `${i + 1}. SPRINT`,
+          speakText: "Pihenő."
+        });
+      }
+    }
+    routine.push({ name: "Levezetés", duration: cooldownSec, class: "bg-cooldown", next: "Edzés Vége!", speakText: "Levezetés." });
+    return routine;
+  }
+
+  function loadProgramWorkout(index) {
+    activeWorkoutIndex = index;
+    const item = workoutData[index];
+    resetTimer();
+    activeRoutine = buildRoutine(120, 20, item.rest, item.sprints, 180);
+    currentStepIndex = 0;
+    secondsLeft = activeRoutine[0].duration;
+    
+    document.getElementById("phaseLabel").innerText = activeRoutine[0].name;
+    document.getElementById("nextLabel").innerText = `Kiválasztva: ${item.day} (${item.week}. hét)`;
+    updateTimerDisplay();
+    switchTab('timer');
+  }
+
+  function launchCustomWorkout() {
+    activeWorkoutIndex = null;
+    const w = parseInt(document.getElementById('customWarmup').value) || 60;
+    const s = parseInt(document.getElementById('customSprint').value) || 20;
+    const r = parseInt(document.getElementById('customRest').value) || 120;
+    const c = parseInt(document.getElementById('customCount').value) || 3;
+    const cd = parseInt(document.getElementById('customCooldown').value) || 120;
+
+    resetTimer();
+    activeRoutine = buildRoutine(w, s, r, c, cd);
+    currentStepIndex = 0;
+    secondsLeft = activeRoutine[0].duration;
+
+    document.getElementById("phaseLabel").innerText = activeRoutine[0].name;
+    document.getElementById("nextLabel").innerText = `Egyéni SIT (${c}×${s}s)`;
+    updateTimerDisplay();
+    switchTab('timer');
+  }
+
+  function toggleTimer() {
+    if (activeRoutine.length === 0) {
+      alert("Válassz ki egy edzést az Edzésterv vagy Egyéni fülön!");
+      switchTab('plan');
+      return;
+    }
+    if (isRunning) pauseTimer(); else startTimer();
+  }
+
+  function startTimer() {
+    isRunning = true;
+    requestWakeLock();
+    document.getElementById("startBtn").innerText = "Szünet";
+    
+    if (secondsLeft === activeRoutine[currentStepIndex].duration) {
+      speak(activeRoutine[currentStepIndex].speakText);
+      beepStart();
+    }
+
+    timerWorker.postMessage('start');
+    updateTimerUI();
+  }
+
+  function pauseTimer() {
+    isRunning = false;
+    releaseWakeLock();
+    timerWorker.postMessage('stop');
+    document.getElementById("startBtn").innerText = "Folytatás";
+  }
+
+  function resetTimer() {
+    pauseTimer();
+    activeRoutine = [];
+    currentStepIndex = 0;
+    secondsLeft = 0;
+    document.getElementById("startBtn").innerText = "Start / Szünet";
+    document.getElementById("phaseLabel").innerText = "Készen állsz?";
+    document.getElementById("timeDisplay").innerText = "00:00";
+    document.getElementById("nextLabel").innerText = "Válassz egy edzést!";
+    document.getElementById("timerCard").className = "timer-card";
+  }
+
+  function skipStep() {
+    if (activeRoutine.length === 0) return;
+    
+    currentStepIndex++;
+    if (currentStepIndex < activeRoutine.length) {
+      secondsLeft = activeRoutine[currentStepIndex].duration;
+      updateTimerUI();
+      beepStart();
+      if (isRunning) speak(activeRoutine[currentStepIndex].speakText);
+    } else {
+      resetTimer();
+      speak("Edzés befejezve!");
+      beepStart();
+      showRpeModal();
+    }
+  }
+
+  function tick() {
+    if (secondsLeft > 0) {
+      if (secondsLeft <= 3 && secondsLeft > 0) beepCount();
+      secondsLeft--;
+    } else {
+      skipStep();
+    }
+    updateTimerUI();
+  }
+
+  function updateTimerDisplay() {
+    const mins = String(Math.floor(secondsLeft / 60)).padStart(2, '0');
+    const secs = String(secondsLeft % 60).padStart(2, '0');
+    document.getElementById("timeDisplay").innerText = `${mins}:${secs}`;
+  }
+
+  function updateTimerUI() {
+    const current = activeRoutine[currentStepIndex];
+    if (!current) return;
+    updateTimerDisplay();
+    document.getElementById("phaseLabel").innerText = current.name;
+    document.getElementById("nextLabel").innerText = `Következik: ${current.next}`;
+    document.getElementById("timerCard").className = `timer-card ${current.class}`;
+  }
+
+  function exportData() {
+    const data = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key.startsWith('sit_')) data[key] = localStorage.getItem(key);
+    }
+    const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'sit_edzes_mentes.json';
+    a.click();
+  }
+
+  renderWorkouts();
+</script>
+
+</body>
+</html>
