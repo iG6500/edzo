@@ -1,820 +1,1131 @@
 <!DOCTYPE html>
 <html lang="hu">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#0f172a">
-  <title>SIT 4 Hetes Pro Edzés</title>
-  <style>
-    :root {
-      --bg-color: #0f172a;
-      --card-bg: #1e293b;
-      --card-border: #334155;
-      --primary: #38bdf8;
-      --accent: #ef4444;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --success: #22c55e;
-      --warning: #f59e0b;
-      --purple: #a855f7;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0b1220">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<title>SIT Pro</title>
+<style>
+  :root{
+    --bg:#0b1220; --surface:#151f33; --surface-2:#1c2942; --line:#2a3a58;
+    --ink:#f4f7fb; --muted:#93a3bd;
+    --sky:#38bdf8; --red:#ef4444; --green:#22c55e; --amber:#f59e0b; --violet:#a855f7;
+    --phase:#38bdf8;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  .ic{
+    width:1.05em; height:1.05em; flex:none; vertical-align:-.16em;
+    fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round;
+  }
+  .btn .ic,.pill .ic{margin-right:.4em}
+  .brand .ic{color:var(--amber); width:1.2em; height:1.2em; margin-right:.15em}
+  html,body{margin:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+    background:var(--bg); color:var(--ink); min-height:100vh;
+    padding:0 0 calc(78px + env(safe-area-inset-bottom)) 0;
+    overflow-x:hidden;
+    transition:background .35s ease;
+  }
+  body.tint{background:radial-gradient(120% 70% at 50% 0%, color-mix(in srgb, var(--phase) 26%, var(--bg)) 0%, var(--bg) 70%)}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+  button:focus-visible,input:focus-visible{outline:2px solid var(--sky); outline-offset:2px}
 
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  header{
+    position:sticky; top:0; z-index:60; display:flex; align-items:center; justify-content:space-between;
+    gap:10px; padding:calc(10px + env(safe-area-inset-top)) 16px 10px;
+    background:rgba(11,18,32,.82); backdrop-filter:blur(12px); border-bottom:1px solid var(--line);
+  }
+  .brand{font-size:1rem; font-weight:800; letter-spacing:.02em; margin:0}
+  .pill{
+    font-size:.78rem; font-weight:700; padding:5px 10px; border-radius:999px;
+    border:1px solid var(--line); background:var(--surface); color:var(--muted);
+  }
+  .pill.hot{color:var(--amber); border-color:rgba(245,158,11,.45); background:rgba(245,158,11,.12)}
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text);
-      margin: 0;
-      padding: 0 0 90px 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+  .wrap{max-width:520px; margin:0 auto; padding:14px 16px}
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:16px}
+  .muted{color:var(--muted)}
+  .row{display:flex; gap:10px}
+  h2.sec{font-size:.78rem; text-transform:uppercase; letter-spacing:.14em; color:var(--muted); margin:22px 4px 10px}
 
-    .app-header {
-      width: 100%;
-      background: rgba(30, 41, 59, 0.85);
-      backdrop-filter: blur(10px);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--card-border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+  .bar{height:8px; border-radius:99px; background:#26344f; overflow:hidden}
+  .bar > i{display:block; height:100%; width:0; background:var(--green); transition:width .4s ease}
+  .bar-meta{display:flex; justify-content:space-between; font-size:.8rem; font-weight:600; color:var(--muted); margin-bottom:8px}
 
-    .app-title { font-size: 1.1rem; font-weight: 700; margin: 0; }
-    .header-actions { display: flex; gap: 8px; align-items: center; }
+  .tab{display:none}
+  .tab.on{display:block}
 
-    .header-btn {
-      background: rgba(255,255,255,0.08);
-      border: 1px solid var(--card-border);
-      color: var(--text);
-      padding: 6px 12px;
-      border-radius: 10px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
+  /* ---- timer ---- */
+  .stage{
+    border:1px solid var(--line); border-top:4px solid var(--phase);
+    background:linear-gradient(180deg, color-mix(in srgb, var(--phase) 10%, var(--surface)) 0%, var(--surface) 60%);
+    border-radius:22px; padding:20px 18px; text-align:center;
+  }
+  .phase{font-size:.85rem; font-weight:800; letter-spacing:.18em; text-transform:uppercase; color:var(--phase)}
+  .clock{
+    font-variant-numeric:tabular-nums; font-feature-settings:"tnum";
+    font-family:"SF Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:clamp(3.6rem,20vw,5.6rem); font-weight:800; letter-spacing:-.04em; line-height:1; margin:8px 0 4px;
+  }
+  .cue{font-size:1.35rem; font-weight:800; line-height:1.25; margin:6px 0 2px; white-space:pre-line}
+  .next{font-size:.82rem; color:var(--muted); font-weight:600}
+  .dots{display:flex; gap:5px; justify-content:center; margin:14px 0 2px; flex-wrap:wrap}
+  .dot{width:26px; height:5px; border-radius:99px; background:#2c3c5b}
+  .dot.done{background:var(--green)} .dot.now{background:var(--phase)}
 
-    .streak-tag {
-      background: rgba(245, 158, 11, 0.15);
-      border: 1px solid rgba(245, 158, 11, 0.4);
-      color: var(--warning);
-      padding: 5px 10px;
-      border-radius: 10px;
-      font-size: 0.8rem;
-      font-weight: 700;
-    }
+  .controls{display:grid; gap:10px; margin-top:16px}
+  .controls .row3{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  .btn{
+    border:0; border-radius:14px; padding:16px 14px; font-size:1rem; font-weight:800;
+    background:var(--sky); color:#08111f; cursor:pointer; width:100%;
+  }
+  .btn:active{transform:scale(.985)}
+  .btn.ghost{background:var(--surface-2); color:var(--ink); border:1px solid var(--line); font-weight:700; padding:13px}
+  .btn.warn{background:var(--amber); color:#1b1200}
+  .btn.small{padding:11px; font-size:.86rem; border-radius:12px}
 
-    .container { max-width: 500px; width: 100%; padding: 16px; flex: 1; }
+  .reps{margin-top:12px; border:1px dashed var(--line); border-radius:16px; padding:14px; background:var(--surface-2)}
+  .reps h3{margin:0 0 10px; font-size:.9rem; font-weight:800}
+  .reps .rr{display:grid; grid-template-columns:56px 1fr 56px; gap:10px; align-items:center}
+  .step{border:1px solid var(--line); background:var(--surface); color:var(--ink); font-size:1.4rem; font-weight:800; border-radius:12px; padding:10px 0; cursor:pointer}
+  .num{
+    width:100%; text-align:center; background:#0d1729; border:1px solid var(--line); color:var(--ink);
+    border-radius:12px; padding:12px 6px; font-size:1.5rem; font-weight:800; font-variant-numeric:tabular-nums;
+  }
+  .hint{font-size:.75rem; color:var(--muted); margin-top:8px}
 
-    .progress-box {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 14px 18px;
-      margin-bottom: 16px;
-    }
+  /* ---- plan ---- */
+  .day{background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:15px; margin-bottom:11px}
+  .day.done{border-color:rgba(34,197,94,.35); opacity:.72}
+  .day.next{border-color:var(--sky); background:linear-gradient(180deg,rgba(56,189,248,.08),var(--surface))}
+  .day-top{display:flex; align-items:center; justify-content:space-between; gap:10px}
+  .day-name{font-weight:800; font-size:1.02rem}
+  .tag{font-size:.68rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--sky)}
+  ol.exlist{margin:10px 0; padding-left:20px; font-size:.93rem; color:#cfd9e8; line-height:1.55}
+  .meta{font-size:.8rem; color:var(--muted); margin-bottom:11px}
+  input[type=checkbox]{width:24px; height:24px; accent-color:var(--green)}
 
-    .progress-info {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-    }
+  /* ---- log ---- */
+  .stats{display:grid; grid-template-columns:repeat(3,1fr); gap:9px}
+  .stat{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:12px 10px; text-align:center}
+  .stat b{display:block; font-size:1.3rem; font-variant-numeric:tabular-nums}
+  .stat span{font-size:.68rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted)}
+  canvas{width:100%; height:190px; display:block}
+  .rec{display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px solid var(--line); font-size:.9rem}
+  .rec:last-child{border-bottom:0}
+  .rec b{font-variant-numeric:tabular-nums}
+  .empty{font-size:.88rem; color:var(--muted); line-height:1.5}
 
-    .progress-container { background: #334155; border-radius: 8px; height: 8px; width: 100%; overflow: hidden; }
-    .progress-bar { background: var(--success); height: 100%; width: 0%; transition: width 0.4s ease; }
+  /* ---- settings ---- */
+  .field{display:grid; gap:6px; margin-bottom:13px}
+  .field label{font-size:.8rem; font-weight:700; color:var(--muted)}
+  .field input[type=text],.field input[type=number]{
+    background:#0d1729; border:1px solid var(--line); color:var(--ink);
+    border-radius:11px; padding:12px; font-size:.98rem; font-weight:600; width:100%;
+  }
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  .switch{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 0}
+  .edit-day{border-top:1px solid var(--line); padding-top:12px; margin-top:12px}
+  .edit-day .lbl{font-size:.8rem; font-weight:800; margin-bottom:7px}
+  .caution{font-size:.78rem; color:var(--amber); background:rgba(245,158,11,.08); border:1px solid rgba(245,158,11,.28); border-radius:12px; padding:10px 12px; line-height:1.45}
 
-    .tab-content { display: none !important; }
-    .tab-content.active-tab { display: block !important; }
+  /* ---- modal ---- */
+  .veil{position:fixed; inset:0; background:rgba(7,12,22,.86); backdrop-filter:blur(8px); z-index:200; display:none; align-items:center; justify-content:center; padding:18px}
+  .veil.on{display:flex}
+  .modal{background:var(--surface); border:1px solid var(--line); border-radius:22px; padding:22px; width:100%; max-width:420px; max-height:86vh; overflow:auto}
+  .rpe{display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin:14px 0}
+  .rpe button{background:var(--surface-2); border:1px solid var(--line); color:var(--ink); padding:13px 0; border-radius:12px; font-weight:800; cursor:pointer}
+  .rpe button:active{background:var(--sky); color:#08111f}
+  .badges{display:grid; grid-template-columns:1fr 1fr; gap:10px; text-align:left}
+  .badge{background:#0d1729; border:1px solid var(--line); border-radius:14px; padding:12px; opacity:.4}
+  .badge.on{opacity:1; border-color:var(--sky)}
+  .badge .ic{width:25px; height:25px; stroke-width:1.6; color:var(--sky)}
+  .badge b{display:block; font-size:.85rem; margin-top:4px}
+  .badge span{font-size:.7rem; color:var(--muted)}
 
-    /* Időzítő Kártya */
-    .timer-card {
-      background: var(--card-bg);
-      border: 2px solid var(--card-border);
-      border-radius: 24px;
-      padding: 24px 20px;
-      text-align: center;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
-      transition: all 0.3s ease;
-    }
-
-    .timer-phase {
-      font-size: 1.1rem;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: var(--primary);
-      font-weight: 800;
-      margin-bottom: 6px;
-    }
-
-    .timer-display {
-      font-size: 4.8rem;
-      font-weight: 800;
-      font-family: "SF Mono", SFMono-Regular, monospace;
-      letter-spacing: -2px;
-      margin: 5px 0;
-      color: #ffffff;
-    }
-
-    .timer-next { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; font-weight: 500; }
-
-    /* EXERCISE BOX A TIMER ALATT */
-    .exercise-instruction-card {
-      background: rgba(15, 23, 42, 0.7);
-      border: 1px solid var(--primary);
-      border-radius: 16px;
-      padding: 16px;
-      margin-top: 16px;
-      text-align: center;
-    }
-
-    .ex-label { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; }
-    .ex-current-title { font-size: 1.1rem; font-weight: 800; color: #ffffff; margin-top: 4px; white-space: pre-line; }
-
-    .timer-controls { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
-    .timer-btn-row { display: flex; gap: 12px; }
-
-    .btn {
-      background: var(--primary);
-      color: #0f172a;
-      border: none;
-      padding: 16px;
-      font-size: 1rem;
-      font-weight: 700;
-      border-radius: 16px;
-      cursor: pointer;
-      flex: 1;
-    }
-
-    .btn:active { transform: scale(0.97); }
-    .btn-skip { background: var(--warning); color: #0f172a; }
-    .btn-reset { background: rgba(255, 255, 255, 0.08); color: var(--text-muted); border: 1px solid var(--card-border); }
-    
-    /* JÓL LÁTHATÓ BEZÁRÓ / MÁSODLAGOS GOMB STÍLUS */
-    .btn-secondary { 
-      background: #334155; 
-      color: #ffffff; 
-      border: 1px solid var(--primary); 
-      padding: 14px; 
-      border-radius: 12px; 
-      font-size: 0.95rem;
-      font-weight: 700; 
-      cursor: pointer; 
-      width: 100%; 
-      transition: background 0.2s;
-    }
-    .btn-secondary:active { background: #475569; }
-
-    /* Edzésterv */
-    .plan-actions { display: flex; justify-content: flex-end; margin-bottom: 14px; }
-    .week-title { font-size: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--primary); margin: 20px 0 12px 4px; }
-    .workout-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 18px; padding: 18px; margin-bottom: 14px; }
-    .workout-card.completed { border-color: rgba(34, 197, 94, 0.4); opacity: 0.8; }
-    .workout-card.active-next { border-color: var(--primary); background: rgba(56, 189, 248, 0.08); box-shadow: 0 0 12px rgba(56, 189, 248, 0.2); }
-    .workout-header { display: flex; align-items: center; justify-content: space-between; }
-    .workout-day { font-weight: 700; font-size: 1.1rem; }
-    .workout-ex { font-size: 0.95rem; margin: 10px 0; white-space: pre-line; line-height: 1.5; color: #cbd5e1; }
-    .workout-meta { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px; }
-
-    .btn-start-workout {
-      background: rgba(56, 189, 248, 0.12);
-      color: var(--primary);
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      padding: 12px;
-      width: 100%;
-      border-radius: 12px;
-      font-size: 0.9rem;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .checkbox { width: 24px; height: 24px; accent-color: var(--success); }
-
-    /* Egyéni Editor */
-    .custom-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 20px;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .form-group { display: flex; flex-direction: column; gap: 6px; }
-    .form-group label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
-    .form-group input {
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      padding: 12px;
-      color: var(--text);
-      font-size: 1rem;
-      font-weight: 700;
-      outline: none;
-    }
-
-    /* Modallok */
-    .modal-overlay {
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px);
-      z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px;
-    }
-    .modal-overlay.active { display: flex; }
-    .modal-box { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 24px; padding: 24px; width: 100%; max-width: 400px; text-align: center; }
-    .rpe-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 16px; }
-    .rpe-btn { background: rgba(255,255,255,0.08); border: 1px solid var(--card-border); color: var(--text); padding: 12px 0; border-radius: 12px; font-weight: 700; cursor: pointer; }
-
-    .badges-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; text-align: left; }
-    .badge-card { background: rgba(15, 23, 42, 0.6); border: 1px solid var(--card-border); border-radius: 14px; padding: 12px; opacity: 0.4; transition: all 0.2s; }
-    .badge-card.unlocked { opacity: 1; border-color: var(--primary); background: rgba(56, 189, 248, 0.05); }
-    .badge-icon { font-size: 1.8rem; margin-bottom: 4px; }
-    .badge-name { font-size: 0.85rem; font-weight: 700; }
-    .badge-desc { font-size: 0.7rem; color: var(--text-muted); }
-
-    /* Bottom Nav */
-    .bottom-nav {
-      position: fixed; bottom: 0; left: 0; right: 0; height: 70px;
-      background: #1e293b; border-top: 1px solid var(--card-border);
-      display: flex; justify-content: space-around; align-items: center; z-index: 1000;
-    }
-    .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: none; border: none; color: var(--text-muted); font-size: 0.75rem; font-weight: 600; cursor: pointer; width: 33.3%; height: 100%; }
-    .nav-item.active-nav { color: var(--primary); border-top: 3px solid var(--primary); }
-
-    .bg-warmup { border-color: #38bdf8 !important; }
-    .bg-sprint { border-color: #ef4444 !important; }
-    .bg-rest   { border-color: #22c55e !important; }
-    .bg-cooldown { border-color: #a855f7 !important; }
-  </style>
+  nav{
+    position:fixed; left:0; right:0; bottom:0; z-index:100; display:flex;
+    background:#101a2c; border-top:1px solid var(--line);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  nav button{
+    flex:1; background:none; border:0; border-top:3px solid transparent; color:var(--muted);
+    font-size:.7rem; font-weight:700; padding:11px 0 12px; cursor:pointer; display:grid; gap:3px; justify-items:center;
+  }
+  nav button .ic{width:22px; height:22px; stroke-width:1.7}
+  nav button.on{color:var(--sky); border-top-color:var(--sky)}
+</style>
 </head>
 <body>
 
-  <div class="app-header">
-    <h1 class="app-title">⚡ SIT Pro</h1>
-    <div class="header-actions">
-      <div class="streak-tag" id="streakTag">🔥 0</div>
-      <button class="header-btn" onclick="openBadgesModal()">🏆 Jelvények</button>
-    </div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13.5 2.5 5 13.5h5.5L9 21.5l9.5-11.5H13z"/></symbol>
+  <symbol id="i-flame" viewBox="0 0 24 24"><path d="M14 2c-.6 2.6.3 4.4 1.9 6.3 1.4 1.7 2.3 3.2 2.3 5.3 0 3.8-2.8 6.6-6.2 6.6S5.8 17.4 5.8 13.6c0-1.5.5-2.9 1.5-4.1.1 1.6.8 2.7 2 3.3-1.5-3.9.2-8.2 4.7-10.8z"/></symbol>
+  <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 3.5h8v5.5a4 4 0 0 1-8 0z"/><path d="M8 4.5H5.2c-.2 2.6 1 4.2 2.9 4.4"/><path d="M16 4.5h2.8c.2 2.6-1 4.2-2.9 4.4"/><path d="M12 13v3.5"/><path d="M9.8 16.5h4.4l.8 4H9z"/><path d="M8 20.5h8"/></symbol>
+  <symbol id="i-timer" viewBox="0 0 24 24"><circle cx="12" cy="13.8" r="7.4"/><path d="M12 10.3v3.5l2.3 1.5"/><path d="M9.5 2.5h5"/><path d="M12 2.5v3.4"/><path d="M18.9 7.4 20.4 6"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5.5" width="17" height="15" rx="2.6"/><path d="M3.5 10.4h17"/><path d="M8 3.2v3.6M16 3.2v3.6"/><path d="M7.8 14h2.2M14 14h2.2M7.8 17.4h2.2M14 17.4h2.2"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 3.5v17h16"/><path d="M8 17v-4.6"/><path d="M12.3 17V7.8"/><path d="M16.6 17v-7"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M6 4v6M6 14v6M12 4v3M12 11v9M18 4v9M18 17v3"/><circle cx="6" cy="12" r="2"/><circle cx="12" cy="9" r="2"/><circle cx="18" cy="15" r="2"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7.5 4.8 19 12 7.5 19.2z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M9.3 4.5v15M14.7 4.5v15"/></symbol>
+  <symbol id="i-next" viewBox="0 0 24 24"><path d="M5.5 5 15 12l-9.5 7z"/><path d="M18.5 4.5v15"/></symbol>
+  <symbol id="i-prev" viewBox="0 0 24 24"><path d="M18.5 5 9 12l9.5 7z"/><path d="M5.5 4.5v15"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3.5v11"/><path d="M8 10.8l4 4 4-4"/><path d="M4.5 19.5h15"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15.5v-11"/><path d="M8 8.7l4-4 4 4"/><path d="M4.5 19.5h15"/></symbol>
+  <symbol id="i-dumbbell" viewBox="0 0 24 24"><rect x="4.6" y="8" width="3.4" height="8" rx="1.2"/><rect x="16" y="8" width="3.4" height="8" rx="1.2"/><path d="M2.4 10.4v3.2M21.6 10.4v3.2"/><path d="M8 12h8"/></symbol>
+  <symbol id="i-crown" viewBox="0 0 24 24"><path d="M3 7.5l4.2 3.8L12 4.5l4.8 6.8L21 7.5l-1.8 11.8H4.8z"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M6 21V4"/><path d="M6 4.8h9.5l-1.7 3.7 1.7 3.8H6"/></symbol>
+  <symbol id="i-half" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20.2 3.8v4.4h-4.4"/></symbol>
+</svg>
+
+<header>
+  <h1 class="brand"><svg class="ic"><use href="#i-bolt"></use></svg>SIT Pro</h1>
+  <div class="row" style="gap:8px">
+    <span class="pill hot" id="streakPill"><svg class="ic"><use href="#i-flame"></use></svg>0</span>
+    <button class="pill" onclick="openBadges()"><svg class="ic"><use href="#i-trophy"></use></svg>Jelvények</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="card" style="padding:13px 16px; margin-bottom:14px">
+    <div class="bar-meta"><span>Program haladás</span><span id="progTxt">0% (0/12)</span></div>
+    <div class="bar"><i id="progBar"></i></div>
   </div>
 
-  <div class="container" id="touchArea">
-    <div class="progress-box">
-      <div class="progress-info">
-        <span>Összesített Haladás</span>
-        <span id="progressText">0% (0/12)</span>
-      </div>
-      <div class="progress-container">
-        <div class="progress-bar" id="progressBar"></div>
+  <!-- ═══ IDŐZÍTŐ ═══ -->
+  <section id="tab-timer" class="tab on">
+    <div class="stage" id="stage">
+      <div class="phase" id="phaseName">Válassz edzést</div>
+      <div class="clock" id="clock">00:00</div>
+      <div class="cue" id="cue">Az Edzésterv fülön indítsd a soron következőt.</div>
+      <div class="next" id="nextUp">&nbsp;</div>
+      <div class="dots" id="dots"></div>
+
+      <div class="controls">
+        <button class="btn" id="mainBtn" onclick="toggleRun()"><svg class="ic"><use href="#i-play"></use></svg>Indítás</button>
+        <div class="row3">
+          <button class="btn ghost" onclick="jump(-1)"><svg class="ic"><use href="#i-prev"></use></svg>Vissza</button>
+          <button class="btn warn" onclick="jump(1)"><svg class="ic"><use href="#i-next"></use></svg>Léptetés</button>
+        </div>
+        <button class="btn ghost" onclick="askAbort()"><svg class="ic"><use href="#i-stop"></use></svg>Edzés megszakítása</button>
       </div>
     </div>
 
-    <!-- 1. Időzítő Nézet -->
-    <div id="tabTimer" class="tab-content active-tab">
-      <div class="timer-card" id="timerCard">
-        <div class="timer-phase" id="phaseLabel">Készen állsz?</div>
-        <div class="timer-display" id="timeDisplay">00:00</div>
-        <div class="timer-next" id="nextLabel">Betöltés...</div>
-        
-        <div class="timer-controls">
-          <div class="timer-btn-row">
-            <button class="btn" id="startBtn" onclick="toggleTimer()">Start / Szünet</button>
-            <button class="btn btn-skip" onclick="skipStep()">Léptetés ⏭</button>
-          </div>
-          <button class="btn btn-reset" onclick="resetTimer()">Mégse / Alaphelyzet</button>
-        </div>
+    <div class="reps" id="repBox" hidden>
+      <h3 id="repTitle">Sprint eredmény</h3>
+      <div class="rr">
+        <button class="step" onclick="bumpRep(-1)" aria-label="Kevesebb">−</button>
+        <input class="num" id="repInput" type="number" inputmode="numeric" min="0" step="1" value="0" oninput="setRep(this.value)">
+        <button class="step" onclick="bumpRep(1)" aria-label="Több">+</button>
       </div>
+      <div class="hint">Ennyi ismétlés ment be a 20 mp-be. Ez kerül a naplóba — ebből látszik a fejlődés.</div>
+    </div>
+  </section>
 
-      <!-- GYAKORLAT UTASÍTÁSOK BOX -->
-      <div class="exercise-instruction-card">
-        <div class="ex-label">Aktuális Feladat</div>
-        <div class="ex-current-title" id="currentExerciseInstruction">Kezdéshez nyomj a Start gombra</div>
+  <!-- ═══ EDZÉSTERV ═══ -->
+  <section id="tab-plan" class="tab">
+    <div id="planList"></div>
+  </section>
+
+  <!-- ═══ NAPLÓ ═══ -->
+  <section id="tab-log" class="tab">
+    <div class="stats">
+      <div class="stat"><b id="stSessions">0</b><span>Edzés</span></div>
+      <div class="stat"><b id="stReps">0</b><span>Ismétlés</span></div>
+      <div class="stat"><b id="stRpe">–</b><span>Átlag RPE</span></div>
+    </div>
+
+    <h2 class="sec">Munkamennyiség edzésenként</h2>
+    <div class="card"><canvas id="chart" height="190"></canvas><div class="hint" id="chartNote"></div></div>
+
+    <h2 class="sec">Rekordok · 20 mp alatt</h2>
+    <div class="card" id="records"></div>
+
+    <h2 class="sec">Utolsó edzések</h2>
+    <div class="card" id="history"></div>
+
+    <h2 class="sec">Adatok</h2>
+    <div class="card">
+      <div class="grid2">
+        <button class="btn ghost small" onclick="exportData()"><svg class="ic"><use href="#i-download"></use></svg>Mentés fájlba</button>
+        <button class="btn ghost small" onclick="document.getElementById('importFile').click()"><svg class="ic"><use href="#i-upload"></use></svg>Visszatöltés</button>
+      </div>
+      <input type="file" id="importFile" accept="application/json" hidden onchange="importData(this)">
+      <div class="hint" id="ioNote">A JSON minden edzést, ismétlést és RPE-t tartalmaz.</div>
+    </div>
+  </section>
+
+  <!-- ═══ BEÁLLÍTÁSOK ═══ -->
+  <section id="tab-set" class="tab">
+    <div class="card">
+      <h2 style="font-size:1rem; margin:0 0 14px">Időzítés</h2>
+      <div class="grid2">
+        <div class="field"><label>Bemelegítés (mp)</label><input type="number" id="sWarm" min="0" onchange="saveSettings()"></div>
+        <div class="field"><label>Sprint (mp)</label><input type="number" id="sSprint" min="5" onchange="saveSettings()"></div>
+        <div class="field"><label>Levezetés (mp)</label><input type="number" id="sCool" min="0" onchange="saveSettings()"></div>
+        <div class="field"><label>Visszaszámlálás (mp)</label><input type="number" id="sLead" min="0" max="15" onchange="saveSettings()"></div>
+      </div>
+      <div class="switch">
+        <span style="font-weight:700; font-size:.92rem">Magyar hangutasítás</span>
+        <input type="checkbox" id="sVoice" onchange="saveSettings()">
+      </div>
+      <div class="switch" style="border-top:1px solid var(--line)">
+        <span style="font-weight:700; font-size:.92rem">Képernyő ébren tartása</span>
+        <input type="checkbox" id="sWake" onchange="saveSettings()">
       </div>
     </div>
 
-    <!-- 2. Edzésterv Nézet -->
-    <div id="tabPlan" class="tab-content">
-      <div class="plan-actions">
-        <button class="btn-secondary" onclick="exportData()" style="width: auto; font-size: 0.8rem;">💾 Haladás kimentése (JSON)</button>
+    <h2 class="sec">Gyakorlat-készlet</h2>
+    <div class="card">
+      <div class="grid2">
+        <button class="btn ghost small" onclick="applyPreset('bw')">Testsúlyos</button>
+        <button class="btn ghost small" onclick="applyPreset('db')">Kézisúlyzós</button>
       </div>
-      <div id="workoutList"></div>
+      <div class="hint" style="margin-bottom:12px">A csere csak a gyakorlatneveket írja át, a haladásod és a naplód megmarad.</div>
+      <div class="caution">Súllyal a 20 mp nem „amíg bírod”, hanem amíg a forma tartja magát. Ha csúszik a technika, ott vége a sprintnek — a hét maradékát is elviszi egy megrántott hát.</div>
+      <div id="planEditor"></div>
     </div>
 
-    <!-- 3. Egyéni Szerkesztő Nézet (Beállítások) -->
-    <div id="tabCustom" class="tab-content">
-      <div class="custom-card">
-        <h2 style="font-size:1.1rem; margin:0 0 4px 0;">⚙️ Egyéni SIT Szerkesztő</h2>
-        <div class="form-group">
-          <label>Bemelegítés (másodperc)</label>
-          <input type="number" id="customWarmup" value="120">
-        </div>
-        <div class="form-group">
-          <label>Sprint hossza (másodperc)</label>
-          <input type="number" id="customSprint" value="20">
-        </div>
-        <div class="form-group">
-          <label>Pihenő hossza (másodperc)</label>
-          <input type="number" id="customRest" value="120">
-        </div>
-        <div class="form-group">
-          <label>Sprintek száma (darab)</label>
-          <input type="number" id="customCount" value="3">
-        </div>
-        <div class="form-group">
-          <label>Levezetés (másodperc)</label>
-          <input type="number" id="customCooldown" value="180">
-        </div>
-        <button class="btn" onclick="launchCustomWorkout()">👹 BEAST MÓD Indítása</button>
+    <h2 class="sec">Szabad edzés</h2>
+    <div class="card">
+      <div class="field"><label>Gyakorlatok, vesszővel elválasztva</label><input type="text" id="fEx" placeholder="pl. DB thruster, Swing, Burpee"></div>
+      <div class="grid2">
+        <div class="field"><label>Sprint (mp)</label><input type="number" id="fSprint" value="20"></div>
+        <div class="field"><label>Pihenő (mp)</label><input type="number" id="fRest" value="120"></div>
       </div>
+      <button class="btn" onclick="startFree()"><svg class="ic"><use href="#i-dumbbell"></use></svg>Szabad edzés indítása</button>
+    </div>
+
+    <h2 class="sec">Nullázás</h2>
+    <div class="card">
+      <button class="btn ghost small" onclick="wipe()" style="color:var(--red); border-color:rgba(239,68,68,.4)">Minden adat törlése</button>
+      <div class="hint">Előtte érdemes a Naplóból fájlba menteni.</div>
+    </div>
+  </section>
+</div>
+
+<!-- RPE -->
+<div class="veil" id="rpeVeil">
+  <div class="modal">
+    <h2 style="margin:0 0 6px; font-size:1.15rem">Edzés kész</h2>
+    <p class="muted" style="margin:0; font-size:.86rem" id="rpeSummary"></p>
+    <p style="font-size:.86rem; font-weight:700; margin:16px 0 0">Mennyire volt kemény? (RPE 1–10)</p>
+    <div class="rpe" id="rpeGrid"></div>
+    <button class="btn ghost small" onclick="saveSession(null)">Mentés értékelés nélkül</button>
+  </div>
+</div>
+
+<!-- Jelvények -->
+<div class="veil" id="badgeVeil">
+  <div class="modal">
+    <h2 style="margin:0 0 14px; font-size:1.15rem">Teljesítmények</h2>
+    <div class="badges" id="badgeGrid"></div>
+    <button class="btn ghost" style="margin-top:18px" onclick="closeBadges()">Bezárás</button>
+  </div>
+</div>
+
+<!-- Megszakítás -->
+<div class="veil" id="abortVeil">
+  <div class="modal">
+    <h2 style="margin:0 0 8px; font-size:1.1rem">Megszakítod?</h2>
+    <p class="muted" style="font-size:.86rem; margin:0 0 16px">Az edzés nem kerül a naplóba.</p>
+    <div class="grid2">
+      <button class="btn ghost small" onclick="closeVeil('abortVeil')">Folytatom</button>
+      <button class="btn small" style="background:var(--red); color:#fff" onclick="abortNow()">Megszakítás</button>
     </div>
   </div>
+</div>
 
-  <!-- RPE Értékelő Modal (Edzés végén mentéssel) -->
-  <div class="modal-overlay" id="rpeModal">
-    <div class="modal-box">
-      <h2 style="font-size:1.2rem; font-weight:800; margin-bottom:8px;">Edzés Teljesítve! 🎉</h2>
-      <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:16px;">Értékeld a terhelési szintet (RPE 1-10):</p>
-      <div class="rpe-grid">
-        <button class="rpe-btn" onclick="submitRPE(1)">1</button>
-        <button class="rpe-btn" onclick="submitRPE(2)">2</button>
-        <button class="rpe-btn" onclick="submitRPE(3)">3</button>
-        <button class="rpe-btn" onclick="submitRPE(4)">4</button>
-        <button class="rpe-btn" onclick="submitRPE(5)">5</button>
-        <button class="rpe-btn" onclick="submitRPE(6)">6</button>
-        <button class="rpe-btn" onclick="submitRPE(7)">7</button>
-        <button class="rpe-btn" onclick="submitRPE(8)">8</button>
-        <button class="rpe-btn" onclick="submitRPE(9)">9</button>
-        <button class="rpe-btn" onclick="submitRPE(10)">10</button>
-      </div>
-      <button class="btn-secondary" onclick="exportData()" style="margin-top:8px;">💾 MENTÉS KIMENTÉSE FÁJLBA</button>
-    </div>
-  </div>
-
-  <!-- Jelvények Modal -->
-  <div class="modal-overlay" id="badgesModal">
-    <div class="modal-box">
-      <h2 style="font-size:1.2rem; font-weight:800; margin-bottom:8px;">🏆 Teljesítmények</h2>
-      <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Mérföldkövek a program során</p>
-      <div class="badges-grid" id="badgesGrid"></div>
-      <!-- JÓL LÁTHATÓ BEZÁRÁS GOMB -->
-      <button class="btn-secondary" style="width:100%; margin-top:20px;" onclick="closeBadgesModal()">Bezárás</button>
-    </div>
-  </div>
-
-  <!-- Bottom Navigation -->
-  <div class="bottom-nav">
-    <button class="nav-item active-nav" id="navBtnTimer" onclick="switchTab('timer')">
-      <span style="font-size:1.3rem;">⏱️</span>
-      <span>Időzítő</span>
-    </button>
-    <button class="nav-item" id="navBtnPlan" onclick="switchTab('plan')">
-      <span style="font-size:1.3rem;">📅</span>
-      <span>Edzésterv</span>
-    </button>
-    <button class="nav-item" id="navBtnCustom" onclick="switchTab('custom')">
-      <span style="font-size:1.3rem;">⚙️</span>
-      <span>Egyéni</span>
-    </button>
-  </div>
+<nav>
+  <button class="on" id="nav-timer" onclick="show('timer')"><svg class="ic"><use href="#i-timer"></use></svg><span>Időzítő</span></button>
+  <button id="nav-plan" onclick="show('plan')"><svg class="ic"><use href="#i-calendar"></use></svg><span>Edzésterv</span></button>
+  <button id="nav-log" onclick="show('log')"><svg class="ic"><use href="#i-chart"></use></svg><span>Napló</span></button>
+  <button id="nav-set" onclick="show('set')"><svg class="ic"><use href="#i-sliders"></use></svg><span>Beállítás</span></button>
+</nav>
 
 <script>
-  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  
-  function setupAudioSession() {
-    if ('mediaSession' in navigator) {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: 'SIT Pro Edzés',
-        artist: 'SIT Timer',
-        album: 'Interval Training'
+"use strict";
+
+/* ══════════════ 1. ADATOK ══════════════ */
+const KEY = "sitpro_v3";
+const DAYS = ["Hétfő","Szerda","Péntek"];
+
+const PRESETS = {
+  bw: [
+    ["Magas térdemelés","Magas térdemelés"],
+    ["Magas térdemelés","Magas térdemelés"],
+    ["Magas térdemelés","Magas térdemelés"],
+    ["Magas térdemelés","Hegymászó","Magas térdemelés"],
+    ["Magas térdemelés","Hegymászó","Magas térdemelés"],
+    ["Magas térdemelés","Hegymászó","Magas térdemelés"],
+    ["Burpee","Hegymászó","Magas térdemelés"],
+    ["Burpee","Hegymászó","Magas térdemelés"],
+    ["Burpee","Hegymászó","Magas térdemelés"],
+    ["Burpee","Hegymászó","Terpeszugrás","Burpee"],
+    ["Burpee","Hegymászó","Terpeszugrás","Burpee"],
+    ["Burpee","Hegymászó","Terpeszugrás","Burpee"]
+  ],
+  db: [
+    ["Goblet guggolás","DB thruster"],
+    ["Goblet guggolás","DB thruster"],
+    ["Goblet guggolás","DB thruster"],
+    ["DB thruster","Kézisúlyzós swing","Goblet guggolás"],
+    ["DB thruster","Kézisúlyzós swing","Goblet guggolás"],
+    ["DB thruster","Kézisúlyzós swing","Goblet guggolás"],
+    ["DB thruster","Kézisúlyzós swing","Renegát evezés"],
+    ["DB thruster","Kézisúlyzós swing","Renegát evezés"],
+    ["DB thruster","Kézisúlyzós swing","Renegát evezés"],
+    ["DB thruster","DB snatch (váltott kar)","Kézisúlyzós swing","Farmer-vágta"],
+    ["DB thruster","DB snatch (váltott kar)","Kézisúlyzós swing","Farmer-vágta"],
+    ["DB thruster","DB snatch (váltott kar)","Kézisúlyzós swing","Farmer-vágta"]
+  ]
+};
+const NOTES = [
+  "Rákészülés, ismerkedés a tempóval","Első teljes erőbedobás","Figyeld, hogy visszaáll-e a pulzus",
+  "Alapprotokoll: 3 sprint","Tartsd mindhármat 100%-on","Séta a pihenőkben, ne állj le",
+  "Sűrítés: 90 mp pihenő","Szigorúan tartott pihenők","A forma előbbre való a darabszámnál",
+  "Plusz egy sprintblokk","Mind a négy maxon","Utolsó edzés: mindent bele"
+];
+const RESTS = [120,120,120,120,120,120,90,90,90,120,120,120];
+
+function freshPlan(preset){
+  return PRESETS[preset].map((ex,i)=>({
+    week: Math.floor(i/3)+1, day: DAYS[i%3],
+    ex: ex.slice(), rest: RESTS[i], note: NOTES[i]
+  }));
+}
+
+const BADGES = [
+  {id:"first", icon:"i-flag",     name:"Első lépés", desc:"1 edzés kész"},
+  {id:"half",  icon:"i-half",     name:"Féltávnál", desc:"6 edzés kész"},
+  {id:"week3", icon:"i-flame",    name:"Harmadik hét", desc:"A 7. edzés kész"},
+  {id:"champ", icon:"i-crown",    name:"SIT bajnok", desc:"Mind a 12 kész"},
+  {id:"free",  icon:"i-dumbbell", name:"Szabad edzés", desc:"Saját protokoll futtatva"},
+  {id:"log",   icon:"i-chart",    name:"Adatgyűjtő", desc:"5 edzés ismétlésszámmal"}
+];
+
+let state = load();
+
+function defaults(){
+  return {
+    v:3, preset:"bw", plan:freshPlan("bw"), done:{}, log:[], badges:{},
+    settings:{warmup:120, sprint:20, cooldown:180, lead:3, voice:true, wake:true}
+  };
+}
+
+function load(){
+  let s = null;
+  try{ s = JSON.parse(localStorage.getItem(KEY) || "null"); }catch(e){ s = null; }
+  if(!s){ s = defaults(); s = migrateOld(s); }
+  const d = defaults();
+  s.settings = Object.assign(d.settings, s.settings || {});
+  if(!Array.isArray(s.plan) || s.plan.length !== 12) s.plan = freshPlan(s.preset || "bw");
+  s.done = s.done || {}; s.log = s.log || []; s.badges = s.badges || {};
+  return s;
+}
+
+/* A régi verzió kulcsainak átvétele, hogy ne veszítsd el a haladást */
+function migrateOld(s){
+  let found = false;
+  for(let i=0;i<12;i++){
+    if(localStorage.getItem("sit_workout_"+i) === "true"){
+      found = true; s.done[i] = true;
+      const rpe = localStorage.getItem("sit_rpe_"+i);
+      s.log.push({
+        planId:i, label:`${s.plan[i].week}. hét · ${s.plan[i].day}`, date:null,
+        rpe: rpe ? Number(rpe) : null, reps:[], ex:s.plan[i].ex.slice(),
+        sprintSec:20, mode:"program", legacy:true
       });
     }
   }
+  if(localStorage.getItem("sit_badge_beast") === "true") s.badges.free = true;
+  if(found) save(s);
+  return s;
+}
 
-  function playSound(freq, type, duration) {
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    setupAudioSession();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start();
-    gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
-    osc.stop(audioCtx.currentTime + duration);
-  }
+function save(s){
+  try{ localStorage.setItem(KEY, JSON.stringify(s || state)); }
+  catch(e){ console.warn("Mentés nem sikerült", e); }
+}
 
-  function beepCount() { playSound(600, 'sine', 0.15); if ('vibrate' in navigator) navigator.vibrate(100); }
-  function beepStart() { playSound(1200, 'triangle', 0.5); if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]); }
+/* ══════════════ 2. HANG ══════════════ */
+let actx = null, keepAlive = null, audioReady = false;
 
-  function speak(text) {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      setTimeout(() => {
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'hu-HU';
-        utterance.rate = 1.0;
-        window.speechSynthesis.speak(utterance);
-      }, 50);
+function silentWav(sec, rate){
+  const n = sec*rate, buf = new ArrayBuffer(44+n), v = new DataView(buf);
+  const txt = (o,s)=>{ for(let i=0;i<s.length;i++) v.setUint8(o+i, s.charCodeAt(i)); };
+  txt(0,"RIFF"); v.setUint32(4, 36+n, true); txt(8,"WAVEfmt ");
+  v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true);
+  v.setUint32(24,rate,true); v.setUint32(28,rate,true); v.setUint16(32,1,true); v.setUint16(34,8,true);
+  txt(36,"data"); v.setUint32(40,n,true);
+  for(let i=0;i<n;i++) v.setUint8(44+i, 128 + (i%2)); // hallhatatlan dither: az iOS a teljes csendet leállítja
+  return URL.createObjectURL(new Blob([buf],{type:"audio/wav"}));
+}
+
+/* Csak felhasználói gesztusból hívható – iOS itt engedi fel az audiót */
+let audioTries = 0;
+function unlockAudio(){
+  if(audioReady || audioTries > 2) return;
+  audioTries++;
+  try{
+    actx = new (window.AudioContext || window.webkitAudioContext)();
+    if(actx.state === "suspended") actx.resume();
+    keepAlive = new Audio(silentWav(3, 8000));
+    keepAlive.loop = true;
+    if("speechSynthesis" in window){
+      const u = new SpeechSynthesisUtterance(" ");
+      u.volume = 0; window.speechSynthesis.speak(u);
     }
-  }
+    audioReady = true;
+  }catch(e){ console.warn("audio", e); }
+}
 
-  let wakeLock = null;
-  async function requestWakeLock() {
-    try {
-      if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen');
-    } catch (err) {}
-  }
+function tone(freq, kind, dur, vol){
+  if(!actx) return;
+  if(actx.state === "suspended") actx.resume();
+  const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime;
+  o.type = kind; o.frequency.setValueAtTime(freq, t);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol || 0.35, t+0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+  o.connect(g); g.connect(actx.destination);
+  o.start(t); o.stop(t+dur+0.02);
+}
+const buzz = p => { if("vibrate" in navigator) try{ navigator.vibrate(p); }catch(e){} };
+function beepTick(){ tone(660,"sine",.14); buzz(80); }
+function beepGo(){ tone(520,"triangle",.12); setTimeout(()=>tone(1040,"triangle",.35),120); buzz([180,80,180]); }
+function beepEnd(){ tone(880,"sine",.18); setTimeout(()=>tone(660,"sine",.18),200); setTimeout(()=>tone(440,"sine",.4),400); buzz([300,120,300]); }
 
-  function releaseWakeLock() {
-    if (wakeLock) { wakeLock.release(); wakeLock = null; }
-  }
+function say(text){
+  if(!state.settings.voice || !("speechSynthesis" in window) || !text) return;
+  try{
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "hu-HU"; u.rate = 1.02;
+    window.speechSynthesis.speak(u);
+  }catch(e){}
+}
 
-  document.addEventListener('visibilitychange', async () => {
-    if (wakeLock !== null && document.visibilityState === 'visible' && isRunning) {
-      await requestWakeLock();
+/* ══════════════ 3. KÉPERNYŐ + ZÁROLT KÉPERNYŐ ══════════════ */
+let wake = null;
+async function wakeOn(){
+  if(!state.settings.wake) return;
+  try{ if("wakeLock" in navigator && !wake) wake = await navigator.wakeLock.request("screen"); }catch(e){}
+}
+function wakeOff(){ try{ if(wake){ wake.release(); wake = null; } }catch(e){} }
+document.addEventListener("visibilitychange", ()=>{
+  if(document.visibilityState === "visible"){
+    if(run.on) wakeOn();
+    paint();
+  }
+});
+
+function media(){
+  if(!("mediaSession" in navigator)) return;
+  const s = step();
+  try{
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: s ? s.name : "SIT Pro",
+      artist: s && s.ex ? s.ex : (run.title || "Interval edzés"),
+      album: run.title || "SIT Pro"
+    });
+    navigator.mediaSession.playbackState = run.on ? "playing" : "paused";
+    if(s && s.dur > 0){
+      navigator.mediaSession.setPositionState({
+        duration: s.dur,
+        position: Math.min(s.dur, Math.max(0, s.dur - run.left)),
+        playbackRate: 1
+      });
     }
+  }catch(e){}
+}
+if("mediaSession" in navigator){
+  const h = navigator.mediaSession;
+  try{
+    h.setActionHandler("play", ()=>startRun());
+    h.setActionHandler("pause", ()=>pauseRun());
+    h.setActionHandler("nexttrack", ()=>jump(1));
+    h.setActionHandler("previoustrack", ()=>jump(-1));
+  }catch(e){}
+}
+
+/* ══════════════ 4. IDŐZÍTŐ MOTOR (időbélyeg-alapú) ══════════════ */
+/* A ketyegés Workerből jön (a háttérben kevésbé fojtják), de ha a Worker nem
+   engedélyezett (file://, szigorú CSP), main threaden folytatjuk. Az időszámítás
+   így is időbélyeg-alapú, tehát pontos marad. */
+const ticker = (function(){
+  let w = null, h = null;
+  try{
+    w = new Worker(URL.createObjectURL(new Blob([`
+      let h=null;
+      onmessage = e => {
+        if(e.data==="go"){ clearInterval(h); h=setInterval(()=>postMessage(0),200); }
+        else { clearInterval(h); h=null; }
+      };
+    `],{type:"application/javascript"})));
+    w.onmessage = function(){ frame(); };
+  }catch(e){ w = null; }
+  return {
+    go(){ if(w) w.postMessage("go"); else { clearInterval(h); h = setInterval(frame,200); } },
+    stop(){ if(w) w.postMessage("stop"); else { clearInterval(h); h = null; } }
+  };
+})();
+
+const run = {
+  routine:[], i:0, left:0, endAt:0, on:false,
+  mode:null, planId:null, title:"", reps:[], exNames:[], lastShown:-1, pendingRep:null
+};
+
+function step(){ return run.routine[run.i] || null; }
+
+function buildRoutine(exList, opt){
+  const st = state.settings;
+  const warm = num(opt.warmup, st.warmup), sp = num(opt.sprint, st.sprint);
+  const rest = num(opt.rest, 120), cool = num(opt.cooldown, st.cooldown);
+  const r = [];
+  if(warm > 0) r.push({
+    kind:"warm", name:"Bemelegítés", dur:warm, color:"var(--sky)", ex:null,
+    cue:"Dinamikus bemelegítés\nkarkörzés, helyben futás",
+    next:`1. sprint · ${exList[0]}`, voice:"Bemelegítés indul."
   });
-
-  const workerBlob = new Blob([`
-    let interval = null;
-    self.onmessage = function(e) {
-      if (e.data === 'start') {
-        interval = setInterval(() => { self.postMessage('tick'); }, 1000);
-      } else if (e.data === 'stop') {
-        clearInterval(interval);
-      }
-    };
-  `], { type: 'application/javascript' });
-  const timerWorker = new Worker(URL.createObjectURL(workerBlob));
-  timerWorker.onmessage = function(e) { if (e.data === 'tick') tick(); };
-
-  const workoutData = [
-    { week: 1, day: "Hétfő", ex: ["Magas térdemelés", "Magas térdemelés"], sprints: 2, rest: 120, note: "Rákészülés, megszokás" },
-    { week: 1, day: "Szerda", ex: ["Magas térdemelés", "Magas térdemelés"], sprints: 2, rest: 120, note: "Maximális erőkifejtés!" },
-    { week: 1, day: "Péntek", ex: ["Magas térdemelés", "Magas térdemelés"], sprints: 2, rest: 120, note: "Figyeld a pulzusod" },
-    { week: 2, day: "Hétfő", ex: ["Magas térdemelés", "Hegymászó", "Magas térdemelés"], sprints: 3, rest: 120, note: "Alap cikk-protokoll" },
-    { week: 2, day: "Szerda", ex: ["Magas térdemelés", "Hegymászó", "Magas térdemelés"], sprints: 3, rest: 120, note: "Tartsd a 100%-os tempót" },
-    { week: 2, day: "Péntek", ex: ["Magas térdemelés", "Hegymászó", "Magas térdemelés"], sprints: 3, rest: 120, note: "Séta a pihenőkben" },
-    { week: 3, day: "Hétfő", ex: ["Burpee", "Hegymászó", "Magas térdemelés"], sprints: 3, rest: 90, note: "Sűrítés: 90 mp pihenő!" },
-    { week: 3, day: "Szerda", ex: ["Burpee", "Hegymászó", "Magas térdemelés"], sprints: 3, rest: 90, note: "Szigorú pihenőidők" },
-    { week: 3, day: "Péntek", ex: ["Burpee", "Hegymászó", "Magas térdemelés"], sprints: 3, rest: 90, note: "Szabályos Burpee forma" },
-    { week: 4, day: "Hétfő", ex: ["Burpee", "Hegymászó", "Terpeszugrás", "Burpee"], sprints: 4, rest: 120, note: "Plusz 1 sprintblokk!" },
-    { week: 4, day: "Szerda", ex: ["Burpee", "Hegymászó", "Terpeszugrás", "Burpee"], sprints: 4, rest: 120, note: "Mind a 4 sprint max gáz" },
-    { week: 4, day: "Péntek", ex: ["Burpee", "Hegymászó", "Terpeszugrás", "Burpee"], sprints: 4, rest: 120, note: "Utolsó edzés: Mindent bele!" }
-  ];
-
-  const badgesDef = [
-    { id: "badge_first", icon: "🚀", name: "Első Lépés", desc: "1. edzés teljesítve" },
-    { id: "badge_halfway", icon: "🔥", name: "Féltávnál", desc: "6 edzés teljesítve" },
-    { id: "badge_burpee", icon: "💥", name: "Burpee Harcos", desc: "3. hét elindítva" },
-    { id: "badge_master", icon: "👑", name: "SIT Bajnok", desc: "Mind a 12 edzés kész" },
-    { id: "badge_beast", icon: "👹", name: "BEAST MÓD", desc: "Egyéni edzés aktiválva" }
-  ];
-
-  function switchTab(tabName) {
-    document.getElementById('tabTimer').classList.toggle('active-tab', tabName === 'timer');
-    document.getElementById('tabPlan').classList.toggle('active-tab', tabName === 'plan');
-    document.getElementById('tabCustom').classList.toggle('active-tab', tabName === 'custom');
-
-    document.getElementById('navBtnTimer').classList.toggle('active-nav', tabName === 'timer');
-    document.getElementById('navBtnPlan').classList.toggle('active-nav', tabName === 'plan');
-    document.getElementById('navBtnCustom').classList.toggle('active-nav', tabName === 'custom');
-  }
-
-  let touchStartX = 0;
-  document.getElementById('touchArea').addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX);
-  document.getElementById('touchArea').addEventListener('touchend', e => {
-    let diff = touchStartX - e.changedTouches[0].screenX;
-    if (diff > 80) {
-      if (document.getElementById('tabTimer').classList.contains('active-tab')) switchTab('plan');
-      else if (document.getElementById('tabPlan').classList.contains('active-tab')) switchTab('custom');
-    } else if (diff < -80) {
-      if (document.getElementById('tabCustom').classList.contains('active-tab')) switchTab('plan');
-      else if (document.getElementById('tabPlan').classList.contains('active-tab')) switchTab('timer');
-    }
+  exList.forEach((ex,i)=>{
+    r.push({
+      kind:"sprint", sprintNo:i, name:`${i+1}. sprint · 100%`, dur:sp, color:"var(--red)", ex:ex,
+      cue:ex.toUpperCase(), next: i === exList.length-1 ? "Levezetés" : "Pihenő",
+      voice:`${i+1}. sprint. ${ex}. Mindent bele!`
+    });
+    if(i < exList.length-1) r.push({
+      kind:"rest", name:"Aktív pihenő", dur:rest, color:"var(--green)", ex:exList[i+1],
+      cue:`Séta, mély légzés\nkövetkezik: ${exList[i+1]}`,
+      next:`${i+2}. sprint · ${exList[i+1]}`, voice:"Pihenő. Sétálj, ne állj le."
+    });
   });
+  if(cool > 0) r.push({
+    kind:"cool", name:"Levezetés", dur:cool, color:"var(--violet)", ex:null,
+    cue:"Laza séta, nyújtás", next:"Edzés vége", voice:"Levezetés."
+  });
+  return r;
+}
+const num = (v,d)=>{ const n = parseInt(v,10); return Number.isFinite(n) && n >= 0 ? n : d; };
 
-  let activeWorkoutIndex = null;
+function loadWorkout(planId, switchTab){
+  const w = state.plan[planId];
+  stop();
+  run.mode = "program"; run.planId = planId;
+  run.title = `${w.week}. hét · ${w.day}`;
+  run.exNames = w.ex.slice();
+  run.reps = new Array(w.ex.length).fill(null);
+  run.routine = buildRoutine(w.ex, {rest:w.rest});
+  run.i = 0; run.left = run.routine[0].dur; run.pendingRep = null;
+  paint();
+  if(switchTab) show("timer");
+}
 
-  // AUTOMATIKUS KÖVETKEZŐ EDZÉS BETÖLTÉSE
-  function autoLoadNextWorkout() {
-    let firstUnfinishedIndex = -1;
-    for (let i = 0; i < workoutData.length; i++) {
-      if (localStorage.getItem(`sit_workout_${i}`) !== "true") {
-        firstUnfinishedIndex = i;
-        break;
-      }
-    }
+function startFree(){
+  const raw = (document.getElementById("fEx").value || "").split(",").map(s=>s.trim()).filter(Boolean);
+  const ex = raw.length ? raw : ["Szabad sprint 1","Szabad sprint 2","Szabad sprint 3"];
+  stop();
+  run.mode = "free"; run.planId = null; run.title = "Szabad edzés";
+  run.exNames = ex.slice(); run.reps = new Array(ex.length).fill(null);
+  run.routine = buildRoutine(ex, {
+    sprint: document.getElementById("fSprint").value,
+    rest: document.getElementById("fRest").value
+  });
+  run.i = 0; run.left = run.routine[0].dur; run.pendingRep = null;
+  state.badges.free = true; save();
+  paint(); renderBadges(); show("timer");
+}
 
-    if (firstUnfinishedIndex !== -1) {
-      loadProgramWorkout(firstUnfinishedIndex, false);
-    } else {
-      resetTimer();
-      document.getElementById("phaseLabel").innerText = "👑 Gratulálunk!";
-      document.getElementById("nextLabel").innerText = "Minden edzést teljesítettél!";
-      document.getElementById("currentExerciseInstruction").innerText = "A 4 hetes SIT programot sikeresen befejezted!";
-    }
+function toggleRun(){
+  unlockAudio();
+  if(!run.routine.length){ show("plan"); return; }
+  run.on ? pauseRun() : startRun();
+}
+
+function startRun(){
+  if(!run.routine.length) return;
+  unlockAudio();
+  run.on = true;
+  run.endAt = Date.now() + run.left*1000;
+  run.lastShown = Math.ceil(run.left);
+  if(keepAlive) keepAlive.play().catch(()=>{});
+  ticker.go();
+  wakeOn();
+  const s = step();
+  if(Math.abs(run.left - s.dur) < 0.4){ beepGo(); say(s.voice); }
+  paint();
+}
+
+function pauseRun(){
+  if(run.on) run.left = Math.max(0, (run.endAt - Date.now())/1000);
+  run.on = false;
+  ticker.stop();
+  if(keepAlive) keepAlive.pause();
+  wakeOff();
+  paint();
+}
+
+function stop(){
+  run.on = false;
+  ticker.stop();
+  if(keepAlive) keepAlive.pause();
+  wakeOff();
+}
+
+function frame(){
+  if(!run.on) return;
+  run.left = (run.endAt - Date.now())/1000;
+  const shown = Math.max(0, Math.ceil(run.left));
+  if(shown !== run.lastShown){
+    run.lastShown = shown;
+    cueAt(shown);
+    paintClock();
+    media();
   }
+  if(run.left <= 0) advance(1);
+}
 
-  function renderWorkouts() {
-    const listEl = document.getElementById("workoutList");
-    listEl.innerHTML = "";
-    let currentWeek = 0;
-    let completedCount = 0;
+function cueAt(sec){
+  const s = step(); if(!s) return;
+  if(sec <= state.settings.lead && sec >= 1) beepTick();
+  if(s.kind === "rest"){
+    if(sec === 30) say("Harminc másodperc.");
+    if(sec === 10) say(`Tíz másodperc. Készülj: ${s.ex}.`);
+  }
+  if(s.kind === "warm" && sec === 10) say("Tíz másodperc a sprintig.");
+}
 
-    let nextUnfinishedIndex = -1;
-    for (let i = 0; i < workoutData.length; i++) {
-      if (localStorage.getItem(`sit_workout_${i}`) !== "true") {
-        nextUnfinishedIndex = i;
-        break;
-      }
-    }
+function jump(dir){ unlockAudio(); advance(dir, true); }
 
-    workoutData.forEach((item, index) => {
-      if (item.week !== currentWeek) {
-        currentWeek = item.week;
-        const weekHeader = document.createElement("div");
-        weekHeader.className = "week-title";
-        weekHeader.innerText = `${currentWeek}. Hét`;
-        listEl.appendChild(weekHeader);
-      }
+function advance(dir, manual){
+  const prev = step();
+  if(dir > 0 && prev && prev.kind === "sprint") openRepBox(prev.sprintNo);
 
-      const isChecked = localStorage.getItem(`sit_workout_${index}`) === "true";
-      if (isChecked) completedCount++;
+  const next = run.i + dir;
+  if(next < 0) return;
+  if(next >= run.routine.length){ finish(); return; }
 
-      const savedRPE = localStorage.getItem(`sit_rpe_${index}`);
-      const isNext = (index === nextUnfinishedIndex);
+  run.i = next;
+  run.left = run.routine[run.i].dur;
+  run.lastShown = Math.ceil(run.left);
+  if(run.on){
+    /* Automatikus váltásnál az előző fázis végéhez fűzzük, így nem gyűlik a csúszás.
+       Ha viszont sokat volt háttérben (több fázis kimaradt), inkább most indul újra. */
+    const chain = (!manual && dir > 0 && run.endAt && run.endAt > Date.now() - 1000);
+    run.endAt = (chain ? run.endAt : Date.now()) + run.left*1000;
+    beepGo(); say(step().voice);
+  }else if(manual){
+    beepGo();
+  }
+  paint();
+}
 
-      const card = document.createElement("div");
-      card.className = `workout-card ${isChecked ? 'completed' : ''} ${isNext ? 'active-next' : ''}`;
-      card.innerHTML = `
-        <div class="workout-header">
-          <div class="workout-day">${item.day} ${isNext ? '<span style="font-size:0.75rem; color:var(--primary); font-weight:700;">(Soron következő)</span>' : ''}</div>
-          <input type="checkbox" class="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleCheck(${index}, this)">
+function finish(){
+  stop();
+  beepEnd(); say("Edzés befejezve. Szép munka!");
+  const done = run.reps.filter(r=>r != null && r > 0);
+  document.getElementById("rpeSummary").textContent =
+    done.length ? `${run.title} · ${sum(done)} ismétlés ${run.reps.length} sprintben.`
+                : `${run.title} · ismétlésszám nélkül mentve.`;
+  openVeil("rpeVeil");
+}
+
+function askAbort(){ if(!run.routine.length) return; openVeil("abortVeil"); }
+function abortNow(){ closeVeil("abortVeil"); stop(); resetStage(); autoNext(); }
+
+function resetStage(){
+  run.routine = []; run.i = 0; run.left = 0; run.reps = []; run.pendingRep = null; run.mode = null;
+  document.getElementById("repBox").hidden = true;
+  document.body.classList.remove("tint");
+}
+
+/* ══════════════ 5. ISMÉTLÉSSZÁM ══════════════ */
+function openRepBox(sprintNo){
+  run.pendingRep = sprintNo;
+  const box = document.getElementById("repBox");
+  box.hidden = false;
+  document.getElementById("repTitle").textContent = `${sprintNo+1}. sprint · ${run.exNames[sprintNo]}`;
+  document.getElementById("repInput").value = run.reps[sprintNo] != null ? run.reps[sprintNo] : 0;
+}
+function setRep(v){
+  if(run.pendingRep == null) return;
+  const n = Math.max(0, parseInt(v,10) || 0);
+  run.reps[run.pendingRep] = n;
+}
+function bumpRep(d){
+  if(run.pendingRep == null) return;
+  const el = document.getElementById("repInput");
+  const n = Math.max(0, (parseInt(el.value,10) || 0) + d);
+  el.value = n; run.reps[run.pendingRep] = n;
+}
+
+/* ══════════════ 6. MENTÉS ══════════════ */
+function saveSession(rpe){
+  state.log.push({
+    planId: run.planId, label: run.title, date: new Date().toISOString(),
+    rpe: rpe, reps: run.reps.slice(), ex: run.exNames.slice(),
+    sprintSec: run.routine.length ? (run.routine.find(s=>s.kind==="sprint")||{}).dur || state.settings.sprint : state.settings.sprint,
+    mode: run.mode
+  });
+  if(run.planId != null) state.done[run.planId] = true;
+  save();
+  closeVeil("rpeVeil");
+  resetStage();
+  renderAll();
+  autoNext();
+  show("log");
+}
+
+/* ══════════════ 7. MEGJELENÍTÉS ══════════════ */
+function show(tab){
+  ["timer","plan","log","set"].forEach(t=>{
+    document.getElementById("tab-"+t).classList.toggle("on", t === tab);
+    document.getElementById("nav-"+t).classList.toggle("on", t === tab);
+  });
+  if(tab === "log") drawChart();
+  window.scrollTo({top:0, behavior:"instant"});
+}
+
+function paintClock(){
+  const l = Math.max(0, Math.ceil(run.left));
+  document.getElementById("clock").textContent =
+    String(Math.floor(l/60)).padStart(2,"0") + ":" + String(l%60).padStart(2,"0");
+}
+
+function paint(){
+  const s = step();
+  const mainBtn = document.getElementById("mainBtn");
+  if(!s){
+    document.getElementById("phaseName").textContent = "Válassz edzést";
+    document.getElementById("clock").textContent = "00:00";
+    document.getElementById("cue").textContent = "Az Edzésterv fülön indítsd a soron következőt.";
+    document.getElementById("nextUp").innerHTML = "&nbsp;";
+    document.getElementById("dots").innerHTML = "";
+    document.getElementById("stage").style.setProperty("--phase","var(--sky)");
+    mainBtn.innerHTML = ico("i-play") + "Indítás";
+    document.body.classList.remove("tint");
+    return;
+  }
+  paintClock();
+  document.getElementById("phaseName").textContent = s.name;
+  document.getElementById("cue").textContent = s.cue;
+  document.getElementById("nextUp").textContent = `${run.title} · következik: ${s.next}`;
+  document.getElementById("stage").style.setProperty("--phase", s.color);
+  document.documentElement.style.setProperty("--phase", s.color);
+  document.body.classList.toggle("tint", s.kind === "sprint" || s.kind === "rest");
+  mainBtn.innerHTML = ico(run.on ? "i-pause" : "i-play") +
+    (run.on ? "Szünet" : (run.left < s.dur ? "Folytatás" : "Indítás"));
+
+  const sprints = run.routine.filter(x=>x.kind === "sprint");
+  document.getElementById("dots").innerHTML = sprints.map(x=>{
+    const cls = x.sprintNo < (s.sprintNo != null ? s.sprintNo : countPast()) ? "done"
+              : (s.kind === "sprint" && x.sprintNo === s.sprintNo ? "now" : "");
+    return `<span class="dot ${cls}"></span>`;
+  }).join("");
+  media();
+}
+function countPast(){
+  let n = 0;
+  for(let i=0;i<run.i;i++) if(run.routine[i].kind === "sprint") n++;
+  return n;
+}
+
+function renderPlan(){
+  const box = document.getElementById("planList");
+  let html = "", week = 0, done = 0;
+  const nextId = firstUndone();
+  state.plan.forEach((w,i)=>{
+    if(w.week !== week){ week = w.week; html += `<h2 class="sec">${week}. hét</h2>`; }
+    const isDone = !!state.done[i];
+    if(isDone) done++;
+    const entry = [...state.log].reverse().find(e=>e.planId === i);
+    const reps = entry && entry.reps ? entry.reps.filter(r=>r != null) : [];
+    html += `
+      <div class="day ${isDone?"done":""} ${i===nextId?"next":""}">
+        <div class="day-top">
+          <div>
+            <div class="day-name">${w.day}</div>
+            ${i===nextId?'<div class="tag">Soron következő</div>':""}
+          </div>
+          <input type="checkbox" ${isDone?"checked":""} onchange="toggleDone(${i}, this.checked)" aria-label="Teljesítve">
         </div>
-        <div class="workout-ex">${item.ex.map((e, i) => `${i+1}. ${e}`).join('\n')}</div>
-        <div class="workout-meta">${item.sprints} × 20 mp sprint (${item.rest} mp pihenő) | <i>${item.note}</i></div>
-        ${savedRPE ? `<div style="font-size:0.8rem; color:var(--warning); font-weight:700; margin-bottom:10px;">🔥 RPE Terhelés: ${savedRPE}/10</div>` : ''}
-        <button class="btn-start-workout" onclick="loadProgramWorkout(${index}, true)">▶ Kijelölés és Indítás</button>
-      `;
-      listEl.appendChild(card);
-    });
+        <ol class="exlist">${w.ex.map(e=>`<li>${esc(e)}</li>`).join("")}</ol>
+        <div class="meta">${w.ex.length} × ${state.settings.sprint} mp · ${w.rest} mp pihenő · <i>${w.note||""}</i></div>
+        ${entry ? `<div class="meta" style="color:var(--amber)">
+            ${entry.rpe?`RPE ${entry.rpe}/10`:"RPE –"}${reps.length?` · ${sum(reps)} ismétlés (${reps.join("/")})`:""}
+          </div>` : ""}
+        <button class="btn ghost small" onclick="loadWorkout(${i}, true)">${ico("i-play")}Betöltés és indítás</button>
+      </div>`;
+  });
+  box.innerHTML = html;
 
-    const percent = Math.round((completedCount / workoutData.length) * 100);
-    document.getElementById("progressBar").style.width = `${percent}%`;
-    document.getElementById("progressText").innerText = `${percent}% (${completedCount}/${workoutData.length})`;
-    document.getElementById("streakTag").innerText = `🔥 ${completedCount}`;
+  const pct = Math.round(done/state.plan.length*100);
+  document.getElementById("progBar").style.width = pct+"%";
+  document.getElementById("progTxt").textContent = `${pct}% (${done}/${state.plan.length})`;
+  document.getElementById("streakPill").innerHTML = ico("i-flame") + streak();
+  awardBadges(done);
+}
 
-    checkBadges(completedCount);
+function toggleDone(i, checked){
+  if(checked) state.done[i] = true; else delete state.done[i];
+  save(); renderAll(); autoNext();
+}
+
+function firstUndone(){
+  for(let i=0;i<state.plan.length;i++) if(!state.done[i]) return i;
+  return -1;
+}
+
+function autoNext(){
+  if(run.on) return; // futó edzést nem írunk felül
+  const id = firstUndone();
+  if(id === -1){
+    resetStage(); paint();
+    document.getElementById("phaseName").textContent = "Program teljesítve";
+    document.getElementById("cue").textContent = "Mind a 12 edzés kész.\nIndíts új kört, vagy állíts össze szabad edzést.";
+    return;
   }
+  loadWorkout(id, false);
+}
 
-  function toggleCheck(index, element) {
-    localStorage.setItem(`sit_workout_${index}`, element.checked);
-    renderWorkouts();
-    autoLoadNextWorkout();
+function streak(){
+  const days = [...new Set(state.log.filter(e=>e.date).map(e=>e.date.slice(0,10)))].sort().reverse();
+  if(!days.length) return 0;
+  const dayNo = s => Math.floor(new Date(s+"T00:00:00").getTime()/86400000);
+  const today = Math.floor(Date.now()/86400000);
+  if(today - dayNo(days[0]) > 4) return 0;
+  let n = 1;
+  for(let i=0;i<days.length-1;i++){
+    if(dayNo(days[i]) - dayNo(days[i+1]) <= 4) n++; else break;
   }
+  return n;
+}
 
-  function checkBadges(completedCount) {
-    let unlocked = {};
-    if (completedCount >= 1) unlocked['badge_first'] = true;
-    if (completedCount >= 6) unlocked['badge_halfway'] = true;
-    if (completedCount >= 12) unlocked['badge_master'] = true;
-    if (localStorage.getItem('sit_workout_6') === "true") unlocked['badge_burpee'] = true;
-    if (localStorage.getItem('sit_badge_beast') === "true") unlocked['badge_beast'] = true;
+function awardBadges(done){
+  if(done >= 1) state.badges.first = true;
+  if(done >= 6) state.badges.half = true;
+  if(state.done[6]) state.badges.week3 = true;
+  if(done >= 12) state.badges.champ = true;
+  if(state.log.filter(e=>(e.reps||[]).some(r=>r>0)).length >= 5) state.badges.log = true;
+  renderBadges();
+}
+function renderBadges(){
+  document.getElementById("badgeGrid").innerHTML = BADGES.map(b=>`
+    <div class="badge ${state.badges[b.id]?"on":""}">
+      ${ico(b.icon)}<b>${b.name}</b><span>${b.desc}</span>
+    </div>`).join("");
+}
 
-    const container = document.getElementById("badgesGrid");
-    container.innerHTML = "";
-    badgesDef.forEach(b => {
-      const isUnlocked = unlocked[b.id];
-      const card = document.createElement("div");
-      card.className = `badge-card ${isUnlocked ? 'unlocked' : ''}`;
-      card.innerHTML = `
-        <div class="badge-icon">${b.icon}</div>
-        <div class="badge-name">${b.name}</div>
-        <div class="badge-desc">${b.desc}</div>
-      `;
-      container.appendChild(card);
-    });
+/* ── napló ── */
+function renderLog(){
+  const done = state.log.filter(e=>e.date || e.legacy);
+  const allReps = state.log.flatMap(e=>(e.reps||[]).filter(r=>r>0));
+  const rpes = state.log.map(e=>e.rpe).filter(r=>r);
+  document.getElementById("stSessions").textContent = done.length;
+  document.getElementById("stReps").textContent = sum(allReps);
+  document.getElementById("stRpe").textContent = rpes.length ? (sum(rpes)/rpes.length).toFixed(1) : "–";
+
+  const best = {};
+  state.log.forEach(e=>(e.reps||[]).forEach((r,i)=>{
+    const name = (e.ex||[])[i]; if(!name || !r) return;
+    if(!best[name] || r > best[name]) best[name] = r;
+  }));
+  const keys = Object.keys(best).sort((a,b)=>best[b]-best[a]);
+  document.getElementById("records").innerHTML = keys.length
+    ? keys.map(k=>`<div class="rec"><span>${esc(k)}</span><b>${best[k]}</b></div>`).join("")
+    : `<div class="empty">Írd be a sprintek után az ismétlésszámot — itt gyűlnek a csúcsaid gyakorlatonként.</div>`;
+
+  const hist = [...state.log].reverse().slice(0,8);
+  document.getElementById("history").innerHTML = hist.length
+    ? hist.map(e=>{
+        const reps = (e.reps||[]).filter(r=>r>0);
+        const d = e.date ? new Date(e.date).toLocaleDateString("hu-HU",{month:"short",day:"numeric"}) : "korábban";
+        return `<div class="rec"><span>${d} · ${esc(e.label||"")}</span>
+          <b>${reps.length?sum(reps)+" ism.":"–"}${e.rpe?" · RPE "+e.rpe:""}</b></div>`;
+      }).join("")
+    : `<div class="empty">Itt jelennek meg a befejezett edzések, dátummal.</div>`;
+}
+
+function drawChart(){
+  const c = document.getElementById("chart");
+  const data = state.log
+    .map(e=>({total: sum((e.reps||[]).filter(r=>r>0)), rpe:e.rpe, date:e.date}))
+    .filter(d=>d.total > 0);
+  const dpr = window.devicePixelRatio || 1;
+  const w = c.clientWidth || 300, h = 190;
+  c.width = w*dpr; c.height = h*dpr;
+  const g = c.getContext("2d");
+  g.setTransform(dpr,0,0,dpr,0,0);
+  g.clearRect(0,0,w,h);
+  const note = document.getElementById("chartNote");
+
+  if(data.length < 1){
+    note.textContent = "Még nincs mért adat. Az ismétlésszámokból épül fel ez a grafikon.";
+    g.fillStyle = "#93a3bd"; g.font = "500 13px -apple-system,sans-serif"; g.textAlign = "center";
+    g.fillText("Nincs adat", w/2, h/2);
+    return;
   }
+  note.textContent = "Oszlop: összes ismétlés · pont: RPE (1–10)";
 
-  function openBadgesModal() { document.getElementById('badgesModal').classList.add('active'); }
-  function closeBadgesModal() { document.getElementById('badgesModal').classList.remove('active'); }
+  const pad = {l:8, r:8, t:14, b:22};
+  const max = Math.max(...data.map(d=>d.total)) * 1.15;
+  const bw = Math.max(6, Math.min(34, (w-pad.l-pad.r)/data.length - 8));
+  const gap = (w-pad.l-pad.r)/data.length;
 
-  function submitRPE(val) {
-    if (activeWorkoutIndex !== null) {
-      localStorage.setItem(`sit_rpe_${activeWorkoutIndex}`, val);
-      localStorage.setItem(`sit_workout_${activeWorkoutIndex}`, "true");
-      document.getElementById('rpeModal').classList.remove('active');
-      renderWorkouts();
-      autoLoadNextWorkout();
+  g.strokeStyle = "#2a3a58"; g.lineWidth = 1;
+  [0,.5,1].forEach(f=>{
+    const y = pad.t + (h-pad.t-pad.b)*f;
+    g.beginPath(); g.moveTo(0,y); g.lineTo(w,y); g.stroke();
+  });
+
+  data.forEach((d,i)=>{
+    const x = pad.l + gap*i + (gap-bw)/2;
+    const bh = (h-pad.t-pad.b) * (d.total/max);
+    const y = h-pad.b-bh;
+    const grd = g.createLinearGradient(0,y,0,h-pad.b);
+    grd.addColorStop(0,"#38bdf8"); grd.addColorStop(1,"rgba(56,189,248,.25)");
+    g.fillStyle = grd;
+    if(g.roundRect){ g.beginPath(); g.roundRect(x,y,bw,bh,5); g.fill(); }
+    else g.fillRect(x,y,bw,bh);
+    g.fillStyle = "#93a3bd"; g.font = "600 10px -apple-system,sans-serif"; g.textAlign = "center";
+    g.fillText(String(d.total), x+bw/2, y-4);
+  });
+
+  const pts = data.map((d,i)=>({
+    x: pad.l + gap*i + gap/2,
+    y: d.rpe ? pad.t + (h-pad.t-pad.b)*(1-d.rpe/10) : null
+  })).filter(p=>p.y != null);
+  if(pts.length){
+    g.strokeStyle = "#f59e0b"; g.lineWidth = 2; g.beginPath();
+    pts.forEach((p,i)=> i ? g.lineTo(p.x,p.y) : g.moveTo(p.x,p.y));
+    g.stroke();
+    g.fillStyle = "#f59e0b";
+    pts.forEach(p=>{ g.beginPath(); g.arc(p.x,p.y,3.2,0,7); g.fill(); });
+  }
+}
+window.addEventListener("resize", ()=>{ if(document.getElementById("tab-log").classList.contains("on")) drawChart(); });
+
+/* ── beállítások ── */
+function renderSettings(){
+  const s = state.settings;
+  document.getElementById("sWarm").value = s.warmup;
+  document.getElementById("sSprint").value = s.sprint;
+  document.getElementById("sCool").value = s.cooldown;
+  document.getElementById("sLead").value = s.lead;
+  document.getElementById("sVoice").checked = !!s.voice;
+  document.getElementById("sWake").checked = !!s.wake;
+
+  document.getElementById("planEditor").innerHTML = state.plan.map((w,i)=>`
+    <div class="edit-day">
+      <div class="lbl">${w.week}. hét · ${w.day}</div>
+      <div class="field"><input type="text" value="${esc(w.ex.join(", "))}" onchange="editEx(${i}, this.value)"></div>
+      <div class="field"><label>Pihenő (mp)</label><input type="number" value="${w.rest}" onchange="editRest(${i}, this.value)"></div>
+    </div>`).join("");
+}
+function saveSettings(){
+  const s = state.settings;
+  s.warmup = num(document.getElementById("sWarm").value, s.warmup);
+  s.sprint = Math.max(5, num(document.getElementById("sSprint").value, s.sprint));
+  s.cooldown = num(document.getElementById("sCool").value, s.cooldown);
+  s.lead = Math.min(15, num(document.getElementById("sLead").value, s.lead));
+  s.voice = document.getElementById("sVoice").checked;
+  s.wake = document.getElementById("sWake").checked;
+  save(); renderPlan();
+  if(!run.on && run.planId != null) loadWorkout(run.planId, false);
+}
+function editEx(i, val){
+  const list = val.split(",").map(x=>x.trim()).filter(Boolean);
+  if(!list.length) return renderSettings();
+  state.plan[i].ex = list; save(); renderPlan(); renderSettings();
+  if(!run.on && run.planId === i) loadWorkout(i, false);
+}
+function editRest(i, val){
+  state.plan[i].rest = num(val, state.plan[i].rest); save(); renderPlan(); renderSettings();
+  if(!run.on && run.planId === i) loadWorkout(i, false);
+}
+function applyPreset(p){
+  state.preset = p;
+  const fresh = freshPlan(p);
+  state.plan = state.plan.map((w,i)=>({week:w.week, day:w.day, ex:fresh[i].ex, rest:w.rest, note:w.note}));
+  save(); renderAll(); renderSettings();
+  if(!run.on) autoNext();
+}
+
+/* ── mentés / visszatöltés ── */
+function exportData(){
+  const blob = new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `sit-naplo-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 3000);
+  document.getElementById("ioNote").textContent = "Fájl elkészült.";
+}
+function importData(input){
+  const f = input.files && input.files[0];
+  if(!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try{
+      const d = JSON.parse(r.result);
+      if(!d || typeof d !== "object") throw new Error("bad");
+      state = Object.assign(defaults(), d);
+      state.settings = Object.assign(defaults().settings, d.settings || {});
+      if(!Array.isArray(state.plan) || state.plan.length !== 12) state.plan = freshPlan(state.preset || "bw");
+      save(); renderAll(); renderSettings(); autoNext();
+      document.getElementById("ioNote").textContent = `Visszatöltve: ${state.log.length} edzés.`;
+    }catch(e){
+      document.getElementById("ioNote").textContent = "Ez a fájl nem SIT-mentés. Válaszd a sit-naplo-….json fájlt.";
     }
-  }
+  };
+  r.readAsText(f);
+  input.value = "";
+}
+function wipe(){
+  if(!confirm("Minden edzés, ismétlés és RPE törlődik. Folytatod?")) return;
+  localStorage.removeItem(KEY);
+  for(let i=0;i<12;i++){ localStorage.removeItem("sit_workout_"+i); localStorage.removeItem("sit_rpe_"+i); }
+  localStorage.removeItem("sit_badge_beast");
+  state = defaults(); save(); stop(); resetStage(); renderAll(); renderSettings(); autoNext();
+}
 
-  let isRunning = false;
-  let currentStepIndex = 0;
-  let secondsLeft = 0;
-  let activeRoutine = [];
+/* ── modal / segédek ── */
+function openVeil(id){ document.getElementById(id).classList.add("on"); }
+function closeVeil(id){ document.getElementById(id).classList.remove("on"); }
+function openBadges(){ renderBadges(); openVeil("badgeVeil"); }
+function closeBadges(){ closeVeil("badgeVeil"); }
+const ico = id => `<svg class="ic" aria-hidden="true"><use href="#${id}"></use></svg>`;
+const sum = a => a.reduce((x,y)=>x+(Number(y)||0),0);
+const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
-  function buildRoutine(warmupSec, sprintSec, restSec, cooldownSec, exList) {
-    let routine = [{ 
-      name: "Bemelegítés", 
-      duration: warmupSec, 
-      class: "bg-warmup", 
-      next: `1. SPRINT: ${exList[0]}`, 
-      instruction: "Könnyű dinamikus bemelegítés, karkörzés, helyben járás.",
-      speakText: "Kezdődik a bemelegítés." 
-    }];
+function renderAll(){ renderPlan(); renderLog(); if(document.getElementById("tab-log").classList.contains("on")) drawChart(); }
 
-    exList.forEach((exName, i) => {
-      routine.push({ 
-        name: `${i + 1}. SPRINT (100%)`, 
-        duration: sprintSec, 
-        class: "bg-sprint", 
-        next: i === exList.length - 1 ? "Levezetés" : "Pihenő",
-        instruction: `🔥 MAX ERŐBEDOBÁS:\n${exName.toUpperCase()}`,
-        speakText: `${i + 1}. sprint! ${exName}! Mindent bele!`
-      });
+/* ── swipe ── */
+let sx = 0;
+document.body.addEventListener("touchstart", e=>{ sx = e.changedTouches[0].screenX; }, {passive:true});
+document.body.addEventListener("touchend", e=>{
+  const d = sx - e.changedTouches[0].screenX;
+  const tabs = ["timer","plan","log","set"];
+  const cur = tabs.findIndex(t=>document.getElementById("tab-"+t).classList.contains("on"));
+  if(Math.abs(d) < 90) return;
+  const nx = d > 0 ? cur+1 : cur-1;
+  if(nx >= 0 && nx < tabs.length) show(tabs[nx]);
+}, {passive:true});
 
-      if (i < exList.length - 1) {
-        routine.push({ 
-          name: "Aktív Pihenő", 
-          duration: restSec, 
-          class: "bg-rest", 
-          next: `${i + 2}. SPRINT: ${exList[i + 1]}`,
-          instruction: `Laza séta, mély légzés.\nKövetkező: ${exList[i + 1]}`,
-          speakText: "Pihenő. Séta a következő sprintig."
-        });
-      }
-    });
+/* ── init ── */
+document.getElementById("rpeGrid").innerHTML =
+  Array.from({length:10},(_,i)=>`<button onclick="saveSession(${i+1})">${i+1}</button>`).join("");
+document.addEventListener("click", unlockAudio, {once:true});
+renderAll(); renderSettings(); autoNext(); renderBadges();
 
-    routine.push({ 
-      name: "Levezetés", 
-      duration: cooldownSec, 
-      class: "bg-cooldown", 
-      next: "Edzés Vége!", 
-      instruction: "Laza séta, nyújtás, légzés rendezése.",
-      speakText: "Levezetés következik." 
-    });
-
-    return routine;
-  }
-
-  function loadProgramWorkout(index, shouldSwitchTab = true) {
-    activeWorkoutIndex = index;
-    const item = workoutData[index];
-    resetTimer();
-    
-    activeRoutine = buildRoutine(120, 20, item.rest, 180, item.ex);
-    currentStepIndex = 0;
-    secondsLeft = activeRoutine[0].duration;
-    
-    document.getElementById("phaseLabel").innerText = activeRoutine[0].name;
-    document.getElementById("nextLabel").innerText = `Kiválasztva: ${item.day} (${item.week}. hét)`;
-    updateTimerUI();
-    if (shouldSwitchTab) switchTab('timer');
-  }
-
-  function launchCustomWorkout() {
-    activeWorkoutIndex = null;
-    localStorage.setItem('sit_badge_beast', 'true');
-    renderWorkouts();
-
-    const w = parseInt(document.getElementById('customWarmup').value) || 60;
-    const s = parseInt(document.getElementById('customSprint').value) || 20;
-    const r = parseInt(document.getElementById('customRest').value) || 120;
-    const c = parseInt(document.getElementById('customCount').value) || 3;
-    const cd = parseInt(document.getElementById('customCooldown').value) || 120;
-
-    const customEx = [];
-    for (let i = 1; i <= c; i++) customEx.push(`BEAST Sprint ${i}/${c}`);
-
-    resetTimer();
-    activeRoutine = buildRoutine(w, s, r, cd, customEx);
-    currentStepIndex = 0;
-    secondsLeft = activeRoutine[0].duration;
-
-    document.getElementById("phaseLabel").innerText = activeRoutine[0].name;
-    document.getElementById("nextLabel").innerText = `BEAST MÓD (${c}×${s}s)`;
-    updateTimerUI();
-    switchTab('timer');
-  }
-
-  function toggleTimer() {
-    if (activeRoutine.length === 0) {
-      alert("Válassz ki egy edzést az Edzésterv vagy Egyéni fülön!");
-      switchTab('plan');
-      return;
-    }
-    if (isRunning) pauseTimer(); else startTimer();
-  }
-
-  function startTimer() {
-    isRunning = true;
-    requestWakeLock();
-    document.getElementById("startBtn").innerText = "Szünet";
-    
-    if (secondsLeft === activeRoutine[currentStepIndex].duration) {
-      speak(activeRoutine[currentStepIndex].speakText);
-      beepStart();
-    }
-
-    timerWorker.postMessage('start');
-    updateTimerUI();
-  }
-
-  function pauseTimer() {
-    isRunning = false;
-    releaseWakeLock();
-    timerWorker.postMessage('stop');
-    document.getElementById("startBtn").innerText = "Folytatás";
-  }
-
-  function resetTimer() {
-    pauseTimer();
-    activeRoutine = [];
-    currentStepIndex = 0;
-    secondsLeft = 0;
-    document.getElementById("startBtn").innerText = "Start / Szünet";
-    document.getElementById("phaseLabel").innerText = "Készen állsz?";
-    document.getElementById("timeDisplay").innerText = "00:00";
-    document.getElementById("nextLabel").innerText = "Válassz egy edzést!";
-    document.getElementById("currentExerciseInstruction").innerText = "Kezdéshez nyomj a Start gombra";
-    document.getElementById("timerCard").className = "timer-card";
-  }
-
-  function skipStep() {
-    if (activeRoutine.length === 0) return;
-    
-    currentStepIndex++;
-    if (currentStepIndex < activeRoutine.length) {
-      secondsLeft = activeRoutine[currentStepIndex].duration;
-      updateTimerUI();
-      beepStart();
-      if (isRunning) speak(activeRoutine[currentStepIndex].speakText);
-    } else {
-      resetTimer();
-      speak("Edzés befejezve! Szép munka!");
-      beepStart();
-      if (activeWorkoutIndex !== null) {
-        document.getElementById('rpeModal').classList.add('active');
-      }
-    }
-  }
-
-  function tick() {
-    if (secondsLeft > 0) {
-      if (secondsLeft <= 3 && secondsLeft > 0) beepCount();
-      secondsLeft--;
-    } else {
-      skipStep();
-    }
-    updateTimerUI();
-  }
-
-  function updateTimerUI() {
-    const current = activeRoutine[currentStepIndex];
-    if (!current) return;
-    
-    const mins = String(Math.floor(secondsLeft / 60)).padStart(2, '0');
-    const secs = String(secondsLeft % 60).padStart(2, '0');
-    document.getElementById("timeDisplay").innerText = `${mins}:${secs}`;
-    
-    document.getElementById("phaseLabel").innerText = current.name;
-    document.getElementById("nextLabel").innerText = `Következik: ${current.next}`;
-    document.getElementById("currentExerciseInstruction").innerText = current.instruction;
-    document.getElementById("timerCard").className = `timer-card ${current.class}`;
-  }
-
-  function exportData() {
-    const data = {};
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key.startsWith('sit_')) data[key] = localStorage.getItem(key);
-    }
-    const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'sit_edzes_mentes.json';
-    a.click();
-  }
-
-  // Inicializálás
-  renderWorkouts();
-  autoLoadNextWorkout();
+if("serviceWorker" in navigator && location.protocol.startsWith("http")){
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
+}
 </script>
-
 </body>
 </html>
